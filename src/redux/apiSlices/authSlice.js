@@ -70,18 +70,6 @@ const authSlice = api.injectEndpoints({
         };
       },
     }),
-
-    profile: builder.query({
-      query: () => {
-        return {
-          method: "GET",
-          url: "/auth/get-profile",
-        };
-      },
-      transformResponse: ({ user }) => {
-        return user;
-      },
-    }),
   }),
 });
 
@@ -91,6 +79,5 @@ export const {
   useForgotPasswordMutation,
   useResetPasswordMutation,
   useChangePasswordMutation,
-  useUpdateProfileMutation,
   useProfileQuery,
 } = authSlice;

@@ -10,6 +10,7 @@ const productSlice = api.injectEndpoints({
           body: data,
         };
       },
+      invalidatesTags: ["Products"],
     }),
     updateProduct: builder.mutation({
       query: ({ id, updatedData }) => {
@@ -19,6 +20,7 @@ const productSlice = api.injectEndpoints({
           body: updatedData,
         };
       },
+      invalidatesTags: ["Products"],
     }),
 
     product: builder.query({
@@ -28,6 +30,7 @@ const productSlice = api.injectEndpoints({
           method: "GET",
         };
       },
+      providesTags: ["Products"],
     }),
   }),
 });

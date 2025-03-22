@@ -5,12 +5,11 @@ import { Badge, Avatar } from "antd";
 import { useUser } from "../../provider/User";
 import { CgMenu } from "react-icons/cg";
 import { useLocation } from "react-router-dom";
+import { imageUrl } from "../../redux/api/baseApi";
 
 const Header = ({ toggleSidebar }) => {
   const { user } = useUser();
-  const src = user?.image?.startsWith("https")
-    ? user?.image
-    : `https://your-image-source/${user?.image}`;
+  const src = `${imageUrl}${user?.image}`;
 
   const location = useLocation();
   const getPageName = () => {
@@ -55,7 +54,7 @@ const Header = ({ toggleSidebar }) => {
             <Avatar size={40} src={src} />
           </div>
 
-          <p>Super Admin</p>
+          <p>{user?.name}</p>
         </Link>
       </div>
     </div>

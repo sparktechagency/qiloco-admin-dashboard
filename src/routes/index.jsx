@@ -16,7 +16,6 @@ import AdminProfile from "../Pages/Dashboard/AdminProfile/AdminProfile";
 // import TermsAndCondition from "../Pages/Dashboard/TermsAndCondition/TermsAndCondition";
 // import ServiceProvidersList from "../Pages/Dashboard/ServiceProvider/ServiceProvidersList.jsx";
 // import Transaction from "../Pages/Dashboard/Transaction/Transaction.jsx";
-import Setting from "../Pages/Dashboard/Setting/Setting.jsx";
 
 import Products from "../Pages/Dashboard/Products/Products.jsx";
 import OrderDetails from "../Pages/Dashboard/OrderDetails/OrderDetails.jsx";
@@ -24,6 +23,7 @@ import Earnings from "../Pages/Dashboard/Earnings/Earnings.jsx";
 import ReturnPolicy from "../Pages/Dashboard/Policy/ReturnPolicy.jsx";
 import PrivacyPolicy from "../Pages/Dashboard/Policy/PrivacyPolicy.jsx";
 import RecentSellingProduct from "../Pages/Dashboard/RecentSellingProduct/RecentSellingProduct.jsx";
+import Setting from "../Pages/Dashboard/Profile/Setting.jsx";
 
 const router = createBrowserRouter([
   {
