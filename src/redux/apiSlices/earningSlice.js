@@ -1,24 +1,39 @@
 import { api } from "../api/baseApi";
 
 const earningSlice = api.injectEndpoints({
-    endpoints: (builder)=>({
-        earnings: builder.query({
-            query: ({page, search})=> {
-                const params = new URLSearchParams();
-                if(page) params.append("page", page)
-                if(search)params.append("search", search)
-                return{
-                    url: `/order/earning-history`,
-                    method: "GET",
-                    headers:{
-                        Authorization: `Bearer ${JSON.parse(localStorage.getItem("token"))}`
-                    }
-                }
-            }
-        }),
-    })
-})
+  endpoints: (builder) => ({
+    // createEarning: builder.mutation({
+    //   query: (data) => {
+    //     return {
+    //       url: "/api/v1/Earning/create",
+    //       method: "POST",
+    //       body: data,
+    //     };
+    //   },
+    // }),
+    // updateEarning: builder.mutation({
+    //   query: ({ id, updatedData }) => {
+    //     return {
+    //       url: `/category/update-category/${id}`,
+    //       method: "PATCH",
+    //       body: updatedData,
+    //     };
+    //   },
+    // }),
+
+    earning: builder.query({
+      query: () => {
+        return {
+          url: "/api/v1/admin/earnings",
+          method: "GET",
+        };
+      },
+    }),
+  }),
+});
 
 export const {
-    useEarningsQuery
+  useEarningQuery,
+  //   useCreateProductMutation,
+  //   useUpdateProductMutation,
 } = earningSlice;

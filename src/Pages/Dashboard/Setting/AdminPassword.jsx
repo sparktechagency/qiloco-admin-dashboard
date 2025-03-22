@@ -2,13 +2,16 @@ import React from "react";
 import { Form, Input, Card, Flex, ConfigProvider, message } from "antd";
 import { EyeInvisibleOutlined, EyeTwoTone } from "@ant-design/icons";
 import ButtonEDU from "../../../components/common/ButtonEDU";
+import { useChangePasswordMutation } from "../../../redux/apiSlices/authSlice";
 
 function AdminPassword() {
+  const [changePassword, { isLoading }] = useChangePasswordMutation();
   const [form] = Form.useForm(); // Form instance
 
   // Handle cancel: Reset form fields
   const handleCancel = () => {
-    form.resetFields();
+    form.resetFields(); // Reset form values
+    form.setFields([]); // Clear validation messages
     message.info("Password change cancelled.");
   };
 
@@ -22,14 +25,21 @@ function AdminPassword() {
         confirmPassword: values.confirmPassword.trim(),
       };
 
-      console.log("Password Updated:", trimmedValues);
+      // Check if new password matches confirm password
+      if (trimmedValues.newPassword !== trimmedValues.confirmPassword) {
+        message.error("New password and confirm password do not match!");
+        return;
+      }
 
-      // Replace this with an API call to update the password
-      message.success("Password updated successfully!");
+      // Call API mutation
+      const response = await changePassword(trimmedValues).unwrap();
 
-      form.resetFields(); // Clear form after successful update
+      message.success(response?.message || "Password updated successfully!");
+
+      form.resetFields(); // Clear form after success
     } catch (error) {
-      console.error("Validation failed:", error);
+      console.error("Password update failed:", error);
+      message.error(error?.data?.message || "Failed to update password.");
     }
   };
 
@@ -87,7 +97,7 @@ function AdminPassword() {
                 }
                 className="h-12 text-slate-50 hover:border-slate-300 focus:ring-0 focus:outline-none"
                 style={{
-                  backgroundColor: "black", // Ensures background stays black
+                  backgroundColor: "black",
                   color: "white",
                   border: "1px solid #555",
                 }}
@@ -114,7 +124,7 @@ function AdminPassword() {
                 }
                 className="h-12 text-slate-50 hover:border-slate-300 focus:ring-0 focus:outline-none"
                 style={{
-                  backgroundColor: "black", // Ensures background stays black
+                  backgroundColor: "black",
                   color: "white",
                   border: "1px solid #555",
                 }}
@@ -149,7 +159,7 @@ function AdminPassword() {
                 }
                 className="h-12 text-slate-50 hover:border-slate-300 focus:ring-0 focus:outline-none"
                 style={{
-                  backgroundColor: "black", // Ensures background stays black
+                  backgroundColor: "black",
                   color: "white",
                   border: "1px solid #555",
                 }}
@@ -159,7 +169,11 @@ function AdminPassword() {
             {/* Buttons: Cancel & Save */}
             <Flex justify="flex-end" className="w-[80%] gap-4">
               <ButtonEDU actionType="cancel" onClick={handleCancel} />
-              <ButtonEDU actionType="save" onClick={handleSave} />
+              <ButtonEDU
+                actionType="save"
+                onClick={handleSave}
+                loading={isLoading}
+              />
             </Flex>
           </Form>
         </ConfigProvider>

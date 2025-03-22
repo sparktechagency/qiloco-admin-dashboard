@@ -1,50 +1,83 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { LuArrowLeftRight } from "react-icons/lu";
 import { Table, ConfigProvider } from "antd";
 import { IoEye } from "react-icons/io5";
 import TransactionDetailsModal from "./TransactionDetailsModal";
+import { useEarningQuery } from "../../../redux/apiSlices/earningSlice";
+import dayjs from "dayjs";
+
 function Earnings() {
+  const { data: earnings } = useEarningQuery();
+  const earningsTableData = earnings?.data?.earnings || [];
+
+  // Calculate today's date in UTC format
+  const today = dayjs().format("YYYY-MM-DD");
+
+  // Calculate earnings
+  const { todayEarnings, totalEarnings } = useMemo(() => {
+    let todayEarnings = 0;
+    let totalEarnings = 0;
+
+    earningsTableData.forEach(({ createdAt, earning }) => {
+      const date = dayjs(createdAt).format("YYYY-MM-DD");
+
+      if (date === today) {
+        todayEarnings += earning;
+      }
+      totalEarnings += earning;
+    });
+
+    return { todayEarnings, totalEarnings };
+  }, [earningsTableData, today]);
+
   return (
     <div className="px-3">
       <div className="w-[576px] h-14 flex justify-between my-4">
         <div className="bg-[#121314] text-white flex items-center justify-evenly w-[278px] h-full rounded-lg">
           <LuArrowLeftRight size={25} />
           Today's Earning
-          <span>${3587}</span>
+          <span>${todayEarnings}</span>
         </div>
         <div className="bg-[#121314] text-white flex items-center justify-evenly w-[278px] h-full rounded-lg">
           <LuArrowLeftRight size={25} />
-          Today's Earning
-          <span>${3587}</span>
+          All Earning
+          <span>${totalEarnings}</span>
         </div>
       </div>
-      <EarningsTable />
+      <EarningsTable earningsTableData={earningsTableData} />
     </div>
   );
 }
 
 export default Earnings;
 
-const EarningsTable = () => {
+const EarningsTable = ({ earningsTableData }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedTransaction, setSelectedTransaction] = useState(null);
+
   const showModal = (record) => {
+    setSelectedTransaction(record); // Store transaction details
     setIsModalOpen(true); // Open modal
   };
+
   const columns = [
     {
       title: "Serial",
       dataIndex: "serial",
       key: "serial",
+      render: (text, record, index) => <>#{index + 1}</>,
     },
     {
       title: "Order Id",
-      dataIndex: "orderid",
-      key: "productname",
+      dataIndex: "orderNumber",
+      key: "orderNumber",
+      render: (text) => text || "N/A",
     },
     {
       title: "Trnx Id",
       dataIndex: "trnxid",
       key: "trnxid",
+      render: (text) => text || "N/A",
     },
     {
       title: "Email",
@@ -53,18 +86,21 @@ const EarningsTable = () => {
     },
     {
       title: "Date",
-      dataIndex: "date",
-      key: "date",
+      dataIndex: "createdAt",
+      key: "createdAt",
+      render: (text) => dayjs(text).format("YYYY-MM-DD HH:mm"),
     },
     {
-      title: "Ammount",
-      dataIndex: "ammount",
-      key: "ammount",
+      title: "Amount",
+      dataIndex: "earning",
+      key: "earning",
+      render: (text) => `$${text}`,
     },
     {
       title: "Status",
       dataIndex: "status",
       key: "status",
+      render: (text) => text || "N/A",
     },
     {
       title: "Action",
@@ -75,7 +111,7 @@ const EarningsTable = () => {
           className="hover:text-[#a11d26]"
           onClick={(e) => {
             e.preventDefault();
-            showModal(record); // Pass row data
+            showModal(record);
           }}
         >
           <IoEye size={24} />
@@ -83,6 +119,7 @@ const EarningsTable = () => {
       ),
     },
   ];
+
   return (
     <div>
       <ConfigProvider
@@ -101,71 +138,16 @@ const EarningsTable = () => {
         }}
       >
         <div className="custom-table">
-          <Table columns={columns} dataSource={rawData} pagination />
+          <Table columns={columns} dataSource={earningsTableData} pagination />
         </div>
       </ConfigProvider>
+
+      {/* Pass transaction details to modal */}
       <TransactionDetailsModal
         isModalOpen={isModalOpen}
         setIsModalOpen={setIsModalOpen}
+        transaction={selectedTransaction}
       />
     </div>
   );
 };
-
-const rawData = [
-  {
-    key: "1",
-    serial: "001",
-    orderid: 7858,
-    trnxid: "skdgflg45",
-    email: "test@gmail.com",
-    date: "2024-02-20",
-    ammount: "$25.99",
-    status: "Delivered",
-    pic: "https://via.placeholder.com/50",
-  },
-  {
-    key: "2",
-    serial: "002",
-    orderid: 7858,
-    trnxid: "skdgflg45",
-    email: "test@gmail.com",
-    date: "2024-02-18",
-    ammount: "$79.99",
-    status: "Pending",
-    pic: "https://via.placeholder.com/50",
-  },
-  {
-    key: "3",
-    serial: "003",
-    orderid: 7858,
-    trnxid: "skdgflg45",
-    email: "test@gmail.com",
-    date: "2024-02-15",
-    ammount: "$49.99",
-    status: "Shipped",
-    pic: "https://via.placeholder.com/50",
-  },
-  {
-    key: "4",
-    serial: "004",
-    orderid: 7858,
-    trnxid: "skdgflg45",
-    email: "test@gmail.com",
-    date: "2024-02-12",
-    ammount: "$129.99",
-    status: "Processing",
-    pic: "https://via.placeholder.com/50",
-  },
-  {
-    key: "5",
-    serial: "005",
-    orderid: 7858,
-    trnxid: "skdgflg45",
-    email: "test@gmail.com",
-    date: "2024-02-10",
-    ammount: "$299.99",
-    status: "Delivered",
-    pic: "https://via.placeholder.com/50",
-  },
-];

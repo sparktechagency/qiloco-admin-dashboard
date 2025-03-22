@@ -76,11 +76,6 @@ const authSlice = api.injectEndpoints({
         return {
           method: "GET",
           url: "/auth/get-profile",
-          headers: {
-            Authorization: `Bearer ${JSON.parse(
-              localStorage.getItem("token")
-            )}`,
-          },
         };
       },
       transformResponse: ({ user }) => {

@@ -20,19 +20,7 @@ const productSlice = api.injectEndpoints({
         };
       },
     }),
-    // deleteCategory: builder.mutation({
-    //   query: (id) => {
-    //     return {
-    //       url: `/category/delete-category/${id}`,
-    //       method: "DELETE",
-    //       headers: {
-    //         Authorization: `Bearer ${JSON.parse(
-    //           localStorage.getItem("token")
-    //         )}`,
-    //       },
-    //     };
-    //   },
-    // }),
+
     product: builder.query({
       query: () => {
         return {

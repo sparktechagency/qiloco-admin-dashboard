@@ -50,7 +50,7 @@ const Header = ({ toggleSidebar }) => {
         </Link>
 
         {/* User Profile */}
-        <Link to="/setting" className="flex items-center gap-2 text-white ">
+        <Link to="/my-profile" className="flex items-center gap-2 text-white ">
           <div className="border rounded-full ">
             <Avatar size={40} src={src} />
           </div>

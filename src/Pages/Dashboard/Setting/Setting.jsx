@@ -1,21 +1,21 @@
 import React from "react";
 import { Tabs, ConfigProvider } from "antd";
-import AdminList from "./AdminList";
 import AdminPassword from "./AdminPassword";
+import Profile from "./Profile";
 
 const onChange = (key) => {
   console.log(key);
 };
 const items = [
   {
-    key: "admin",
-    label: "Admin",
-    children: <AdminList />,
-  },
-  {
     key: "password",
     label: "Password",
     children: <AdminPassword />,
+  },
+  {
+    key: "profile",
+    label: "profile",
+    children: <Profile />,
   },
 ];
 function Setting() {
