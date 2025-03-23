@@ -4,15 +4,12 @@ import { SlCalender } from "react-icons/sl";
 import { MdCheckBoxOutlineBlank } from "react-icons/md";
 import man from "../../../assets/quiloco/man.png";
 import paycard from "../../../assets/quiloco/icons/paycard.png";
-import { render } from "react-dom";
-function OrderDetailsModal({ isModalOpen, setIsModalOpen, data }) {
-  const handleOk = () => {
-    setIsModalOpen(false);
-  };
 
-  const handleCancel = () => {
-    setIsModalOpen(false);
-  };
+const OrderDetailsModal = ({ isModalOpen, setIsModalOpen, data }) => {
+  // Log the data to ensure it's passed correctly
+  console.log("Modal data:", data);
+
+  const handleCancel = () => setIsModalOpen(false);
 
   return (
     <ConfigProvider
@@ -24,10 +21,11 @@ function OrderDetailsModal({ isModalOpen, setIsModalOpen, data }) {
             titleColor: "#ffffff",
             titleFontSize: 24,
           },
-          Form: {
-            labelColor: "#ffffff",
+          Table: {
+            headerBg: "#353536",
+            colorText: "white",
+            rowHoverBg: "#4a4a4a",
           },
-          Table: {},
         },
       }}
     >
@@ -35,164 +33,143 @@ function OrderDetailsModal({ isModalOpen, setIsModalOpen, data }) {
         title="View Details"
         open={isModalOpen}
         centered
-        onOk={handleOk}
-        width={1000}
-        height={500}
         onCancel={handleCancel}
+        width={1000}
         footer={null}
       >
-        <div className="flex justify-between mt-4 ">
+        <div className="flex justify-between mt-4">
+          {/* Order Info */}
           <div className="flex flex-col gap-3">
             <div className="flex gap-4 items-center text-white">
-              <h3>
-                Orders ID: {data?.serial}
-                {console.log(data)}
-              </h3>
+              <h3>Order ID: {data?.orderNumber || "No Order Number"}</h3>
               <div
                 className={`${
-                  data.status === "Processing"
+                  data?.deliveryStatus === "processing"
                     ? "bg-amber-400"
-                    : data.status === "Pending"
+                    : data?.deliveryStatus === "pending"
                     ? "bg-red-400"
-                    : data.status === "Delivered"
+                    : data?.deliveryStatus === "delivered"
                     ? "bg-green-400"
                     : "bg-sky-400"
                 } w-fit px-3 py-1 rounded-sm text-white`}
               >
-                {data?.status}
+                {data?.deliveryStatus
+                  ? data.deliveryStatus.charAt(0).toUpperCase() +
+                    data.deliveryStatus.slice(1)
+                  : "No Status"}
               </div>
             </div>
             <div className="flex gap-4 items-center text-white">
               <SlCalender />
-              Feb 16,2022 - Feb 20,2022
+              {data?.createdAt
+                ? `${new Date(
+                    data.createdAt
+                  ).toLocaleDateString()} - ${new Date(
+                    data.updatedAt
+                  ).toLocaleDateString()}`
+                : "No date information"}
             </div>
           </div>
 
-          <div className="flex gap-4 items-start ">
-            <div>
-              <img src={man} alt="" width={50} className="border rounded-lg" />
-            </div>
-
+          {/* Customer Info */}
+          <div className="flex gap-4 items-start">
+            <img
+              src={man}
+              alt="Customer"
+              width={50}
+              className="border rounded-lg"
+            />
             <div>
               <h4 className="text-[20px] font-semibold text-green-400">
                 Customer
               </h4>
-              <p className="text-[16px] text-white font-medium">
-                Full name: {data?.customername}
+              <p className="text-white">
+                Full name: {data?.customerName || "N/A"}
               </p>
-              <p className="text-[16px] text-white font-medium">
-                Email: {"Samuel@gmail.com"}
-              </p>
-              <p className="text-[16px] text-white font-medium">
-                Phone: {"+91 904 231 1212"}
-              </p>
+              <p className="text-white">Email: {data?.email || "N/A"}</p>
+              <p className="text-white">Phone: {data?.phoneNumber || "N/A"}</p>
             </div>
           </div>
         </div>
-        <PaymentInfo />
-        <OrderDeitailsTable data={data} />
+
+        {/* Payment Info & Order Table */}
+        <PaymentInfo data={data} />
+        <OrderDetailsTable data={data} />
       </Modal>
     </ConfigProvider>
   );
-}
+};
 
 export default OrderDetailsModal;
 
-const PaymentInfo = (data) => {
-  return (
-    <div className="flex flex-col gap-2 my-3 ">
-      <h5 className="text-lime-700 font-bold">Payment Info</h5>
-      <div className="flex gap-3">
-        <img src={paycard} />
-        <p>Master Card **** **** 6557</p>
-      </div>
-      {/* <div>
-        <p>Master Card **** **** 6557</p>
-        <p>Master Card **** **** 6557</p>
-      </div> */}
+// Payment Info Component
+const PaymentInfo = ({ data }) => (
+  <div className="flex flex-col gap-2 my-3">
+    <h5 className="text-lime-700 font-bold">Payment Info</h5>
+    <div className="flex gap-3">
+      <img src={paycard} alt="Card" />
+      <p>
+        {data?.paymentStatus === "paid"
+          ? `Payment completed (${data.paymentIntentId || "No ID"})`
+          : data?.paymentMethod || "Master Card **** **** 6557"}
+      </p>
     </div>
-  );
-};
+  </div>
+);
 
-const OrderDeitailsTable = (data) => {
+// Order Details Table Component
+const OrderDetailsTable = ({ data }) => {
+  const columns = [
+    {
+      title: "",
+      dataIndex: "box",
+      key: "box",
+      render: () => <MdCheckBoxOutlineBlank size={25} />,
+    },
+    { title: "Product Name", dataIndex: "productName", key: "productName" },
+    { title: "Serial", dataIndex: "serial", key: "serial" },
+    { title: "Quantity", dataIndex: "quantity", key: "quantity" },
+    { title: "Amount", dataIndex: "amount", key: "amount" },
+  ];
+
+  // Handle products data and ensure there's fallback
+  const dataSource =
+    data?.products?.map((product, index) => ({
+      key: product.productId || index,
+      productName: product.productName || "Unknown Product",
+      serial: data?.orderNumber || "N/A",
+      quantity: product.quantity || 0,
+      amount: `$${product.totalPrice || 0}`,
+    })) || [];
+
   return (
-    <div className="">
-      <ConfigProvider
-        theme={{
-          components: {
-            Table: {
-              headerBg: "#353536",
-              headerSplitColor: "none",
-              headerColor: "white",
-              borderColor: "#A3A3A3",
-              colorBgContainer: "#353536",
-              rowHoverBg: "#4a4a4a",
-              colorText: "white",
-              headerBorderRadius: "none",
-            },
+    <ConfigProvider
+      theme={{
+        components: {
+          Table: {
+            headerBg: "#353536",
+            colorText: "white",
+            rowHoverBg: "#4a4a4a",
+            headerSplitColor: "none",
           },
-        }}
-      >
+        },
+      }}
+    >
+      <div>
         <Table
           columns={columns}
           dataSource={dataSource}
           pagination={false}
-          showHeader={false}
+          showHeader
+          // bordered
         />
-      </ConfigProvider>
-      <div className="flex justify-end  w-full my-4 ">
-        <p className="text-amber-400 mr-28">
-          Total<span className="font-sans ml-20">$ {8554}</span>
-        </p>
+        <div className="flex justify-end my-4">
+          <p className="text-amber-400 mr-28">
+            Total{" "}
+            <span className="font-sans ml-20">${data?.totalPrice || 0}</span>
+          </p>
+        </div>
       </div>
-    </div>
+    </ConfigProvider>
   );
 };
-const dataSource = [
-  {
-    key: "1",
-    productname: "Wireless Mouse",
-    serial: "#001",
-    quantity: 10,
-    ammount: "$25.99",
-  },
-  {
-    key: "2",
-    productname: "Mechanical Keyboard",
-    serial: "#002",
-    quantity: 5,
-    ammount: "$79.99",
-  },
-  // Add more rows as needed
-];
-const columns = [
-  {
-    title: "",
-    dataIndex: "box",
-    key: "box",
-    render: () => {
-      return <MdCheckBoxOutlineBlank size={25} />;
-    },
-  },
-  {
-    title: "Product Name",
-    dataIndex: "productname",
-    key: "productname",
-  },
-  {
-    title: "Serial",
-    dataIndex: "serial",
-    key: "serial",
-  },
-  {
-    title: "Quantity",
-    dataIndex: "quantity",
-    key: "quantity",
-  },
-
-  {
-    title: "Ammount",
-    dataIndex: "ammount",
-    key: "ammount",
-  },
-];

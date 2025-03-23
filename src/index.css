@@ -212,17 +212,13 @@ textarea::placeholder {
 }
 
 .ant-table-wrapper .ant-table-tbody > tr > td {
-  color: "#929394";
+  color: "#3a3a3a";
 }
 
-/* .ant-table-row {
-  background-color: #232323;
-  color: #f7f7f7;
+.ant-table-wrapper .ant-table {
+  color: #dcdcdc;
+  background-color: #3a3a3a !important;
 }
-.ant-table-row:hover {
-  background-color: #232323;
-  color: #f7f7f7;
-} */
 
 .ant-upload-wrapper.ant-upload-picture-card-wrapper
   .ant-upload.ant-upload-select {

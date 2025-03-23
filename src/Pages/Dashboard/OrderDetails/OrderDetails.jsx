@@ -1,28 +1,70 @@
-import React, { useState } from "react";
-import { Table, Avatar, ConfigProvider } from "antd";
-import { IoEye } from "react-icons/io5";
+import React, { useState, useEffect } from "react";
+import {
+  Table,
+  Avatar,
+  ConfigProvider,
+  Spin,
+  Alert,
+  Menu,
+  Dropdown,
+  Button,
+} from "antd";
+import { DownOutlined } from "@ant-design/icons";
 import OrderDetailsModal from "./OrderDetailsModal";
+import { useGetOrderQuery } from "../../../redux/apiSlices/orderSlice";
+import { getImageUrl } from "../../../components/common/ImageUrl";
 
 function OrderDetails() {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedOrder, setSelectedOrder] = useState(null); // Store selected order
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [orders, setOrders] = useState([]); // Local state for managing status updates
 
-  const showModal = (record) => {
-    setSelectedOrder(record); // Set selected order data
-    setIsModalOpen(true); // Open modal
+  const { data: orderList, isError, isLoading } = useGetOrderQuery();
+
+  // Helper function to transform order data
+  const transformOrderData = (orderListData) => {
+    return orderListData.map((order) => ({
+      key: order._id,
+      serial: order.orderNumber,
+      productname: order.products[0]?.productName || "N/A",
+      customername: order.customerName,
+      date: new Date(order.createdAt).toLocaleDateString(),
+      amount: `$${order.totalPrice.toFixed(2)}`,
+      status: order.deliveryStatus
+        ? order.deliveryStatus.charAt(0).toUpperCase() +
+          order.deliveryStatus.slice(1)
+        : "Unknown",
+      pic: order.products[0]?.image
+        ? getImageUrl(order.products[0].image)
+        : "https://via.placeholder.com/50",
+      fullData: order, // Store full order data for modal
+    }));
   };
 
-  const dataSource = rawData.map((item) => ({
-    ...item,
-    serial: `#${item.serial}`,
-  }));
+  // Populate local orders state when data is fetched
+  useEffect(() => {
+    if (orderList?.data?.orders) {
+      setOrders(transformOrderData(orderList.data.orders));
+    }
+  }, [orderList]);
+
+  // Open modal and set selected order
+  const showModal = (order) => {
+    setSelectedOrder(order.fullData); // Pass the original order data
+    setIsModalOpen(true);
+  };
+
+  // Update order status dynamically
+  const handleStatusChange = (key, newStatus) => {
+    setOrders((prevOrders) =>
+      prevOrders.map((order) =>
+        order.key === key ? { ...order, status: newStatus } : order
+      )
+    );
+  };
 
   const columns = [
-    {
-      title: "Serial",
-      dataIndex: "serial",
-      key: "serial",
-    },
+    { title: "Serial", dataIndex: "serial", key: "serial" },
     {
       title: "Product Name",
       dataIndex: "productname",
@@ -34,36 +76,24 @@ function OrderDetails() {
         </div>
       ),
     },
-    {
-      title: "Customer Name",
-      dataIndex: "customername",
-      key: "customername",
-    },
-    {
-      title: "Date",
-      dataIndex: "date",
-      key: "date",
-    },
-    {
-      title: "Ammount",
-      dataIndex: "ammount",
-      key: "ammount",
-    },
+    { title: "Customer Name", dataIndex: "customername", key: "customername" },
+    { title: "Date", dataIndex: "date", key: "date" },
+    { title: "Amount", dataIndex: "amount", key: "amount" },
     {
       title: "Status",
       dataIndex: "status",
       key: "status",
       render: (_, record) => (
         <p
-          className={
+          className={`${
             record.status === "Delivered"
               ? "text-green-400"
               : record.status === "Pending"
-              ? "text-[#bef310]"
+              ? "text-yellow-400"
               : record.status === "Processing"
               ? "text-red-400"
               : "text-sky-400"
-          }
+          }`}
         >
           {record.status}
         </p>
@@ -72,53 +102,78 @@ function OrderDetails() {
     {
       title: "Action",
       key: "action",
-      render: (_, record) => (
-        <a
-          href="#"
-          className="hover:text-[#a11d26]"
-          onClick={(e) => {
-            e.preventDefault();
-            showModal(record); // Pass row data
-          }}
-        >
-          <IoEye size={24} />
-        </a>
-      ),
+      render: (_, record) => {
+        const menu = (
+          <Menu onClick={({ key }) => handleStatusChange(record.key, key)}>
+            <Menu.Item key="Pending">Pending</Menu.Item>
+            <Menu.Item key="Processing">Processing</Menu.Item>
+            <Menu.Item key="Shipped">Shipped</Menu.Item>
+            <Menu.Item key="Delivered">Delivered</Menu.Item>
+          </Menu>
+        );
+
+        return (
+          <div className="flex items-center gap-2">
+            <Button
+              className="bg-transparent text-white rounded-lg"
+              onClick={() => showModal(record)}
+            >
+              View details
+            </Button>
+            <Dropdown
+              overlay={menu}
+              trigger={["click"]}
+              className="w-24 rounded-lg"
+            >
+              <Button
+                className="bg-transparent text-white rounded"
+                icon={<DownOutlined />}
+              >
+                {record.status}
+              </Button>
+            </Dropdown>
+          </div>
+        );
+      },
     },
   ];
 
   return (
     <>
       <div className="px-3 py-4">
-        <ConfigProvider
-          theme={{
-            components: {
-              Table: {
-                headerBg: "#575858",
-                headerSplitColor: "none",
-                headerColor: "white",
-                borderColor: "#A3A3A3",
-                colorBgContainer: "#3a3a3a",
-                rowHoverBg: "#4a4a4a",
-                colorText: "white",
+        {isLoading ? (
+          <Spin size="large" className="flex justify-center mt-10" />
+        ) : isError ? (
+          <Alert message="Failed to load orders" type="error" showIcon />
+        ) : (
+          <ConfigProvider
+            theme={{
+              components: {
+                Table: {
+                  headerBg: "#575858",
+                  headerSplitColor: "none",
+                  headerColor: "white",
+                  borderColor: "#A3A3A3",
+                  colorBgContainer: "#3a3a3a",
+                  rowHoverBg: "#4a4a4a",
+                  colorText: "white",
+                },
               },
-            },
-          }}
-        >
-          <div className="custom-table">
+            }}
+          >
             <Table
-              dataSource={dataSource}
+              dataSource={orders}
               columns={columns}
               pagination={{ pageSize: 5 }}
             />
-          </div>
-        </ConfigProvider>
+          </ConfigProvider>
+        )}
       </div>
       {selectedOrder && (
         <OrderDetailsModal
           isModalOpen={isModalOpen}
           setIsModalOpen={setIsModalOpen}
-          data={selectedOrder} // Pass selected order to modal
+          data={selectedOrder}
         />
       )}
     </>
@@ -126,56 +181,3 @@ function OrderDetails() {
 }
 
 export default OrderDetails;
-
-const rawData = [
-  {
-    key: "1",
-    serial: "001",
-    productname: "Wireless Mouse",
-    customername: "Michael Johnson",
-    date: "2024-02-20",
-    ammount: "$25.99",
-    status: "Delivered",
-    pic: "https://via.placeholder.com/50",
-  },
-  {
-    key: "2",
-    serial: "002",
-    productname: "Mechanical Keyboard",
-    customername: "John Smith",
-    date: "2024-02-18",
-    ammount: "$79.99",
-    status: "Pending",
-    pic: "https://via.placeholder.com/50",
-  },
-  {
-    key: "3",
-    serial: "003",
-    productname: "Gaming Headset",
-    customername: "Emily Brown",
-    date: "2024-02-15",
-    ammount: "$49.99",
-    status: "Shipped",
-    pic: "https://via.placeholder.com/50",
-  },
-  {
-    key: "4",
-    serial: "004",
-    productname: "USB-C Docking Station",
-    customername: "Daniel Wilson",
-    date: "2024-02-12",
-    ammount: "$129.99",
-    status: "Processing",
-    pic: "https://via.placeholder.com/50",
-  },
-  {
-    key: "5",
-    serial: "005",
-    productname: "4K Monitor",
-    customername: "Sophia Martinez",
-    date: "2024-02-10",
-    ammount: "$299.99",
-    status: "Delivered",
-    pic: "https://via.placeholder.com/50",
-  },
-];
