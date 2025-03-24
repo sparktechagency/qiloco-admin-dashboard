@@ -27,6 +27,8 @@ function ReturnPolicy() {
       style: {
         background: "#000",
         color: "#ccc",
+        maxHeight: "600px", // Set a max height
+        overflowY: "auto", // Enable vertical scrolling
       },
 
       statusbar: false,
@@ -37,6 +39,7 @@ function ReturnPolicy() {
       enableDragAndDropFileToEditor: true,
       allowResizeX: false,
       allowResizeY: false,
+      scrollY: true,
       buttons: [
         "source",
         "|",

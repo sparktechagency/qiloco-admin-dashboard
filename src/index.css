@@ -251,25 +251,6 @@ textarea::placeholder {
   /* transform: scale(1); */
 }
 
-.ant-steps
-  .ant-steps-item-finish
-  > .ant-steps-item-container
-  > .ant-steps-item-tail::after {
-  background-color: #975cdb;
-}
-
-.ant-steps
-  .ant-steps-item-finish
-  .ant-steps-item-icon
-  > .ant-steps-icon
-  .ant-steps-icon-dot {
-  background: #975cdb;
-}
-
-.ant-steps .ant-steps-item-finish .ant-steps-item-icon > .ant-steps-icon {
-  color: #975cdb;
-}
-
 .ant-select-selection-item {
   color: white !important;
 }
@@ -384,4 +365,15 @@ textarea::placeholder {
   border-radius: 6px;
   outline: none;
   transition: all 0.2s;
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Hide number input spinner (Firefox) */
+input[type="number"] {
+  -moz-appearance: textfield;
 }

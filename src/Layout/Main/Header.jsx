@@ -2,16 +2,19 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { FaRegBell } from "react-icons/fa6";
 import { Badge, Avatar } from "antd";
-import { useUser } from "../../provider/User";
+
 import { CgMenu } from "react-icons/cg";
 import { useLocation } from "react-router-dom";
 import { imageUrl } from "../../redux/api/baseApi";
+import { useProfileQuery } from "../../redux/apiSlices/profileSlice";
 
 const Header = ({ toggleSidebar }) => {
-  const { user } = useUser();
+  const { data: profile } = useProfileQuery();
+  const user = profile?.data;
   const src = `${imageUrl}${user?.image}`;
 
   const location = useLocation();
+
   const getPageName = () => {
     const path = location.pathname;
     if (path === "/") return "Dashboard";

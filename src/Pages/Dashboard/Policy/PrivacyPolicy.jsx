@@ -23,11 +23,13 @@ function PrivacyPolicy() {
   // Memoize editor configuration
   const editorConfig = useMemo(
     () => ({
-      height: 500,
+      scrollY: true,
       theme: "dark",
       style: {
         background: "#000",
         color: "#ccc",
+        maxHeight: "600px", // Set a max height
+        overflowY: "auto", // Enable vertical scrolling
       },
       showCharsCounter: false,
       showWordsCounter: false,

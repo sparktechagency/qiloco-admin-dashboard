@@ -10,6 +10,8 @@ const profileSlice = api.injectEndpoints({
           body: data,
         };
       },
+
+      invalidatesTags: ["Profile"],
     }),
 
     profile: builder.query({
@@ -20,6 +22,7 @@ const profileSlice = api.injectEndpoints({
           body: data,
         };
       },
+      providesTags: ["Profile"],
     }),
   }),
 });

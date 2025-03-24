@@ -3,14 +3,19 @@ import man from "../../../assets/quiloco/man.png";
 import { FaFeather } from "react-icons/fa6";
 import { Button, ConfigProvider, Form, Input, Upload, message } from "antd";
 import { HiMiniPencil } from "react-icons/hi2";
-import { useUser } from "../../../provider/User";
+
 import { imageUrl } from "../../../redux/api/baseApi";
-import { useUpdateProfileMutation } from "../../../redux/apiSlices/profileSlice";
+import {
+  useProfileQuery,
+  useUpdateProfileMutation,
+} from "../../../redux/apiSlices/profileSlice";
+import Spinner from "../../../components/common/Spinner";
 
 function Profile() {
   const [showButton, setShowButton] = useState(false);
   const [uploadedImage, setUploadedImage] = useState(null);
-  const { user } = useUser(); // Correctly get user from context
+  const { data: profile } = useProfileQuery();
+  const user = profile?.data;
 
   return (
     <ConfigProvider
@@ -96,7 +101,7 @@ export default Profile;
 
 const ProfileDetails = ({ showButton, setShowButton, user, uploadedImage }) => {
   const [form] = Form.useForm();
-  const { updateUser } = useUser(); // Assuming there's an updateUser function
+  // const { updateUser } = useUser(); // Assuming there's an updateUser function
   const [updateProfile, { isLoading }] = useUpdateProfileMutation();
 
   // Reset form when user data changes or editing mode changes
@@ -105,7 +110,7 @@ const ProfileDetails = ({ showButton, setShowButton, user, uploadedImage }) => {
       form.setFieldsValue({
         name: user.name,
         email: user.email,
-        phone: user.mobileNumber,
+        phone: user.phoneNumber,
         role: user.role,
       });
     }
@@ -142,9 +147,6 @@ const ProfileDetails = ({ showButton, setShowButton, user, uploadedImage }) => {
       if (response.success) {
         message.success("Profile updated successfully!");
         setShowButton(false);
-        if (updateUser && response.data) {
-          updateUser(response.data); // Update user context
-        }
       }
     } catch (error) {
       console.error("Profile update failed:", error);
@@ -152,6 +154,7 @@ const ProfileDetails = ({ showButton, setShowButton, user, uploadedImage }) => {
     }
   };
 
+  if (isLoading) <Spinner />;
   return (
     <ConfigProvider
       theme={{

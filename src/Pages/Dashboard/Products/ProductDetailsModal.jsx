@@ -2,13 +2,19 @@ import React from "react";
 import { Modal, ConfigProvider, Descriptions, Avatar } from "antd";
 import { getImageUrl } from "../../../components/common/ImageUrl";
 
-function ProductDetailsModal({ isModalOpen, setIsModalOpen, product }) {
+function ProductDetailsModal({ isModalOpen, setIsModalOpen, record }) {
+  console.log("ProductDetailsModal rendered with:", { isModalOpen, record });
+
   const handleCancel = () => {
+    console.log("Modal cancel button clicked");
     setIsModalOpen(false);
   };
 
-  // If no product is selected, don't render anything
-  if (!product) return null;
+  // If no record is selected, don't render anything
+  if (!record) {
+    console.log("No record provided, returning null");
+    return null;
+  }
 
   return (
     <ConfigProvider
@@ -40,15 +46,15 @@ function ProductDetailsModal({ isModalOpen, setIsModalOpen, product }) {
       >
         <div className="text-white py-4">
           <div className="flex items-center mb-6">
-            {product?.image && product.image.length > 0 && (
+            {record?.productImg && (
               <Avatar
                 shape="square"
                 size={100}
-                src={getImageUrl(product.image[0])}
+                src={getImageUrl(record.productImg)}
                 className="mr-4"
               />
             )}
-            <h2 className="text-2xl font-bold">{product?.name}</h2>
+            <h2 className="text-2xl font-bold">{record?.productName}</h2>
           </div>
 
           <Descriptions
@@ -61,95 +67,95 @@ function ProductDetailsModal({ isModalOpen, setIsModalOpen, product }) {
               label="ID"
               style={{ color: "#555d64", fontWeight: "bold" }}
             >
-              {product?._id}
+              {record?._id}
             </Descriptions.Item> */}
             {/* <Descriptions.Item
               label="User ID"
               style={{ color: "#555d64", fontWeight: "bold" }}
             >
-              {product?.userId}
+              {record?.userId}
             </Descriptions.Item> */}
             <Descriptions.Item
               label="Name"
               style={{ color: "#555d64", fontWeight: "bold" }}
             >
-              {product?.name}
+              {record?.productName}
             </Descriptions.Item>
             <Descriptions.Item
               label="Price"
               style={{ color: "#555d64", fontWeight: "bold" }}
             >
-              ${product?.price}
+              {record?.productPrice}
             </Descriptions.Item>
             <Descriptions.Item
               label="Quantity"
               style={{ color: "#555d64", fontWeight: "bold" }}
             >
-              {product?.quantity}
+              {record?.quantity}
             </Descriptions.Item>
             <Descriptions.Item
               label="Quality"
               style={{ color: "#555d64", fontWeight: "bold" }}
             >
-              {product?.quality}
+              {record?.quality}
             </Descriptions.Item>
             <Descriptions.Item
               label="Potency"
               style={{ color: "#555d64", fontWeight: "bold" }}
             >
-              {product?.potency}
+              {record?.productPotency}
             </Descriptions.Item>
             <Descriptions.Item
               label="Genetics"
               style={{ color: "#555d64", fontWeight: "bold" }}
             >
-              {product?.genetics}
+              {record?.productGenetics}
             </Descriptions.Item>
             <Descriptions.Item
               label="Origin"
               style={{ color: "#555d64", fontWeight: "bold" }}
             >
-              {product?.origin}
+              {record?.productOrigin}
             </Descriptions.Item>
             <Descriptions.Item
               label="Type"
               style={{ color: "#555d64", fontWeight: "bold" }}
             >
-              {product?.type}
+              {record?.productType}
             </Descriptions.Item>
             <Descriptions.Item
               label="Scent"
               style={{ color: "#555d64", fontWeight: "bold" }}
             >
-              {product?.scent}
+              {record?.productScent}
             </Descriptions.Item>
             <Descriptions.Item
               label="Description"
               span={2}
               style={{ color: "#555d64", fontWeight: "bold" }}
             >
-              {product?.description}
+              {record?.productDescription}
             </Descriptions.Item>
             <Descriptions.Item
               label="Mood Tags"
               span={2}
               style={{ color: "#555d64", fontWeight: "bold" }}
             >
-              {product?.moodTag && product.moodTag.join(", ")}
+              {record?.moodTag && record.moodTag.join(", ")}
             </Descriptions.Item>
             <Descriptions.Item
               label="Created At"
               span={2}
               style={{ color: "#555d64", fontWeight: "bold" }}
             >
-              {new Date(product?.createdAt).toLocaleString()}
+              {record?.createdAt}
             </Descriptions.Item>
             {/* <Descriptions.Item
               label="Updated At"
               span={2}
               style={{ color: "#555d64", fontWeight: "bold" }}
             >
-              {new Date(product?.updatedAt).toLocaleString()}
+              {new Date(record?.updatedAt).toLocaleString()}
             </Descriptions.Item> */}
           </Descriptions>
         </div>
