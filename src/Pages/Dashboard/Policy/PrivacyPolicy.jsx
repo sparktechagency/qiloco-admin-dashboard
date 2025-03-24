@@ -1,4 +1,10 @@
-import React, { useRef, useState, useCallback, useMemo } from "react";
+import React, {
+  useRef,
+  useState,
+  useCallback,
+  useMemo,
+  useEffect,
+} from "react";
 import JoditEditor from "jodit-react";
 import { debounce } from "lodash";
 import {
@@ -66,13 +72,13 @@ function PrivacyPolicy() {
       // Performance settings
       useSearch: false,
       spellcheck: false,
-      iframe: true, // Changed to true for better performance
+      iframe: true, // Better performance
     }),
     []
   );
 
   // Load policy data when component mounts
-  React.useEffect(() => {
+  useEffect(() => {
     if (isSuccess && data?.data?.privacyPolicy) {
       const policyText =
         typeof data.data.privacyPolicy === "string"
@@ -84,7 +90,7 @@ function PrivacyPolicy() {
   }, [data, isSuccess]);
 
   // Show error messages
-  React.useEffect(() => {
+  useEffect(() => {
     if (isError && error) {
       message.error(error.message || "Failed to load privacy policy.");
     }
@@ -97,7 +103,7 @@ function PrivacyPolicy() {
   const debouncedUpdate = useCallback(
     debounce((newContent) => {
       setContent(newContent);
-    }, 500),
+    }, 300), // Reduced debounce time for better responsiveness
     []
   );
 
@@ -112,10 +118,18 @@ function PrivacyPolicy() {
   // Handle save button click
   const handleSave = useCallback(async () => {
     try {
-      await updatePolicy({ updatedData: { privacyPolicy: content } }).unwrap();
+      // Add logging to inspect the data being sent
+      console.log("Sending data:", { privacyPolicy: content });
+
+      const result = await updatePolicy({
+        updatedData: { privacyPolicy: content },
+      }).unwrap();
+
+      console.log("API response:", result);
       message.success("Privacy policy updated successfully!");
     } catch (err) {
-      message.error("Update failed! Try again.");
+      console.error("Update error:", err);
+      message.error(`Update failed: ${err.message || "Try again"}`);
     }
   }, [updatePolicy, content]);
 
@@ -128,7 +142,7 @@ function PrivacyPolicy() {
       <JoditEditor
         ref={editor}
         value={content}
-        onBlur={handleUpdate} // Using onBlur instead of onChange as in your example
+        onChange={handleUpdate} // Changed from onBlur to onChange for immediate updates
         config={editorConfig}
       />
       <button
