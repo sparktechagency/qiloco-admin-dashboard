@@ -11,58 +11,68 @@ import {
 } from "antd";
 import { DownOutlined } from "@ant-design/icons";
 import OrderDetailsModal from "./OrderDetailsModal";
-import { useGetOrderQuery } from "../../../redux/apiSlices/orderSlice";
+import {
+  useGetOrderQuery,
+  useUpdateOrderStatusMutation,
+} from "../../../redux/apiSlices/orderSlice";
 import { getImageUrl } from "../../../components/common/ImageUrl";
 
 function OrderDetails() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
-  const [orders, setOrders] = useState([]); // Local state for managing status updates
-
+  const [orders, setOrders] = useState([]);
   const { data: orderList, isError, isLoading } = useGetOrderQuery();
+  const [updateOrderStatus, { isLoading: isUpdating }] =
+    useUpdateOrderStatusMutation();
 
-  // Helper function to transform order data
-  const transformOrderData = (orderListData) => {
-    return orderListData.map((order) => ({
-      key: order._id,
-      serial: order.orderNumber,
-      productname: order.products[0]?.productName || "N/A",
-      customername: order.customerName,
-      date: new Date(order.createdAt).toLocaleDateString(),
-      amount: `$${order.totalPrice.toFixed(2)}`,
-      status: order.deliveryStatus
-        ? order.deliveryStatus.charAt(0).toUpperCase() +
-          order.deliveryStatus.slice(1)
-        : "Unknown",
-      pic: order.products[0]?.image
-        ? getImageUrl(order.products[0].image)
-        : "https://via.placeholder.com/50",
-      fullData: order, // Store full order data for modal
-    }));
-  };
-
-  // Populate local orders state when data is fetched
+  // Transform API response to table-friendly format
   useEffect(() => {
     if (orderList?.data?.orders) {
-      setOrders(transformOrderData(orderList.data.orders));
+      setOrders(
+        orderList.data.orders.map((order) => ({
+          key: order._id,
+          serial: order.orderNumber,
+          productname: order.products[0]?.productName || "N/A",
+          customername: order.customerName,
+          date: new Date(order.createdAt).toLocaleDateString(),
+          amount: `$${order.totalPrice.toFixed(2)}`,
+          status: order.deliveryStatus
+            ? order.deliveryStatus.charAt(0).toUpperCase() +
+              order.deliveryStatus.slice(1)
+            : "Unknown",
+          pic: order.products[0]?.image
+            ? getImageUrl(order.products[0].image)
+            : "https://via.placeholder.com/50",
+          fullData: order, // Store full order data for modal
+        }))
+      );
     }
   }, [orderList]);
 
   // Open modal and set selected order
   const showModal = (order) => {
-    setSelectedOrder(order.fullData); // Pass the original order data
+    setSelectedOrder(order.fullData);
     setIsModalOpen(true);
   };
 
-  // Update order status dynamically
-  const handleStatusChange = (key, newStatus) => {
-    setOrders((prevOrders) =>
-      prevOrders.map((order) =>
-        order.key === key ? { ...order, status: newStatus } : order
-      )
-    );
+  // Handle order status update
+  const handleStatusChange = async (key, newStatus) => {
+    try {
+      // Optimistically update UI
+      setOrders((prevOrders) =>
+        prevOrders.map((order) =>
+          order.key === key ? { ...order, status: newStatus } : order
+        )
+      );
+
+      // Update order status in backend
+      await updateOrderStatus({ status: newStatus, id: key }).unwrap();
+    } catch (error) {
+      console.error("Failed to update status:", error);
+    }
   };
 
+  // Table columns
   const columns = [
     { title: "Serial", dataIndex: "serial", key: "serial" },
     {
@@ -105,10 +115,10 @@ function OrderDetails() {
       render: (_, record) => {
         const menu = (
           <Menu onClick={({ key }) => handleStatusChange(record.key, key)}>
-            <Menu.Item key="Pending">Pending</Menu.Item>
-            <Menu.Item key="Processing">Processing</Menu.Item>
-            <Menu.Item key="Shipped">Shipped</Menu.Item>
-            <Menu.Item key="Delivered">Delivered</Menu.Item>
+            <Menu.Item key="pending">Pending</Menu.Item>
+            <Menu.Item key="processing">Processing</Menu.Item>
+            <Menu.Item key="cancel">Cancel</Menu.Item>
+            <Menu.Item key="delivered">Delivered</Menu.Item>
           </Menu>
         );
 
