@@ -8,6 +8,7 @@ import {
   Menu,
   Dropdown,
   Button,
+  message, // Import message component
 } from "antd";
 import { DownOutlined } from "@ant-design/icons";
 import OrderDetailsModal from "./OrderDetailsModal";
@@ -21,7 +22,9 @@ function OrderDetails() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [orders, setOrders] = useState([]);
-  const { data: orderList, isError, isLoading } = useGetOrderQuery();
+  const [updatingOrderId, setUpdatingOrderId] = useState(null);
+  const [page, setPage] = useState(1);
+  const { data: orderList, isError, isLoading } = useGetOrderQuery(page);
   const [updateOrderStatus, { isLoading: isUpdating }] =
     useUpdateOrderStatusMutation();
 
@@ -55,26 +58,58 @@ function OrderDetails() {
     setIsModalOpen(true);
   };
 
-  // Handle order status update
   const handleStatusChange = async (key, newStatus) => {
     try {
-      // Optimistically update UI
-      setOrders((prevOrders) =>
-        prevOrders.map((order) =>
-          order.key === key ? { ...order, status: newStatus } : order
-        )
-      );
+      // Set the order being updated
+      setUpdatingOrderId(key);
 
       // Update order status in backend
-      await updateOrderStatus({ status: newStatus, id: key }).unwrap();
+      const response = await updateOrderStatus({
+        status: newStatus,
+        id: key,
+      }).unwrap();
+
+      if (response.success === true) {
+        // Success message
+        message.success(`Order status updated to ${newStatus} successfully`);
+
+        // Update UI after successful backend update
+        setOrders((prevOrders) =>
+          prevOrders.map((order) =>
+            order.key === key
+              ? {
+                  ...order,
+                  status:
+                    newStatus.charAt(0).toUpperCase() + newStatus.slice(1),
+                }
+              : order
+          )
+        );
+      } else {
+        // Error message if backend returns non-success response
+        message.error(response.message || "Failed to update order status");
+      }
     } catch (error) {
+      // Error message for network or unexpected errors
       console.error("Failed to update status:", error);
+      message.error(
+        error.data?.message ||
+          "An error occurred while updating order status. Please try again."
+      );
+    } finally {
+      // Reset updating state
+      setUpdatingOrderId(null);
     }
   };
 
   // Table columns
   const columns = [
-    { title: "Serial", dataIndex: "serial", key: "serial" },
+    {
+      title: "Serial",
+      dataIndex: "serial",
+      key: "serial",
+      render: (text, record, index) => <>#{index + 1}</>,
+    },
     {
       title: "Product Name",
       dataIndex: "productname",
@@ -115,10 +150,34 @@ function OrderDetails() {
       render: (_, record) => {
         const menu = (
           <Menu onClick={({ key }) => handleStatusChange(record.key, key)}>
-            <Menu.Item key="pending">Pending</Menu.Item>
-            <Menu.Item key="processing">Processing</Menu.Item>
-            <Menu.Item key="cancel">Cancel</Menu.Item>
-            <Menu.Item key="delivered">Delivered</Menu.Item>
+            <Menu.Item key="pending">
+              {updatingOrderId === record.key && isUpdating ? (
+                <Spin size="small" />
+              ) : (
+                "Pending"
+              )}
+            </Menu.Item>
+            <Menu.Item key="processing">
+              {updatingOrderId === record.key && isUpdating ? (
+                <Spin size="small" />
+              ) : (
+                "Processing"
+              )}
+            </Menu.Item>
+            <Menu.Item key="cancel">
+              {updatingOrderId === record.key && isUpdating ? (
+                <Spin size="small" />
+              ) : (
+                "Cancel"
+              )}
+            </Menu.Item>
+            <Menu.Item key="delivered">
+              {updatingOrderId === record.key && isUpdating ? (
+                <Spin size="small" />
+              ) : (
+                "Delivered"
+              )}
+            </Menu.Item>
           </Menu>
         );
 
@@ -154,7 +213,12 @@ function OrderDetails() {
         {isLoading ? (
           <Spin size="large" className="flex justify-center mt-10" />
         ) : isError ? (
-          <Alert message="Failed to load orders" type="error" showIcon />
+          <Alert
+            message="Failed to load orders"
+            description="Unable to retrieve order information. Please try refreshing the page."
+            type="error"
+            showIcon
+          />
         ) : (
           <ConfigProvider
             theme={{
@@ -171,11 +235,18 @@ function OrderDetails() {
               },
             }}
           >
-            <Table
-              dataSource={orders}
-              columns={columns}
-              pagination={{ pageSize: 5 }}
-            />
+            <div className="custom-table">
+              <Table
+                dataSource={orders}
+                columns={columns}
+                size="middle"
+                pagination={{
+                  onChange: (page) => setPage(page),
+                  pageSize: orderList?.data?.meta?.limit,
+                  total: orderList?.data?.meta?.total,
+                }}
+              />
+            </div>
           </ConfigProvider>
         )}
       </div>

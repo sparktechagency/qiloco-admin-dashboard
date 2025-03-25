@@ -3,10 +3,10 @@ import { api } from "../api/baseApi";
 const authSlice = api.injectEndpoints({
   endpoints: (builder) => ({
     getRecentProduct: builder.query({
-      query: () => {
+      query: (page) => {
         return {
           method: "GET",
-          url: `/api/v1/admin/dashboard/products`,
+          url: `/api/v1/admin/dashboard/products?page=${page}`,
         };
       },
     }),

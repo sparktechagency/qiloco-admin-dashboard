@@ -22,9 +22,9 @@ const earningSlice = api.injectEndpoints({
     // }),
 
     earning: builder.query({
-      query: () => {
+      query: (page) => {
         return {
-          url: "/api/v1/admin/earnings",
+          url: `/api/v1/admin/earnings?page=${page}`,
           method: "GET",
         };
       },

@@ -9,7 +9,6 @@ import ForgotPassword from "../Pages/Auth/ForgotPassword";
 import VerifyOtp from "../Pages/Auth/VerifyOtp";
 import ResetPassword from "../Pages/Auth/ResetPassword";
 import NotFound from "../NotFound";
-import Notifications from "../Pages/Dashboard/Notifications";
 
 import AdminProfile from "../Pages/Dashboard/AdminProfile/AdminProfile";
 
@@ -24,6 +23,7 @@ import ReturnPolicy from "../Pages/Dashboard/Policy/ReturnPolicy.jsx";
 import PrivacyPolicy from "../Pages/Dashboard/Policy/PrivacyPolicy.jsx";
 import RecentSellingProduct from "../Pages/Dashboard/RecentSellingProduct/RecentSellingProduct.jsx";
 import Setting from "../Pages/Dashboard/Profile/Setting.jsx";
+import Notifications from "../Pages/Notification/Notifications.jsx";
 
 const router = createBrowserRouter([
   {

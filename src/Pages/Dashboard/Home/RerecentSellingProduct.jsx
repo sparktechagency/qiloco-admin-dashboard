@@ -1,11 +1,12 @@
-import React from "react";
+import React, { useState } from "react";
 import { Table, Avatar, ConfigProvider } from "antd";
 import { IoEye } from "react-icons/io5";
 import productImg from "../../../assets/quiloco/productImg.png";
 import { useGetRecentProductQuery } from "../../../redux/apiSlices/overViewSlice";
 
 function RecentSellingProduct() {
-  const { data, isLoading, isError } = useGetRecentProductQuery();
+  const [page, setPage] = useState(1);
+  const { data, isLoading, isError } = useGetRecentProductQuery(page);
 
   // Ensure data is available
   const earnings = data?.data?.earnings || [];
@@ -56,15 +57,15 @@ function RecentSellingProduct() {
       dataIndex: "totalPrice",
       key: "totalPrice",
     },
-    {
-      title: "Action",
-      key: "action",
-      render: () => (
-        <a href="#" className="hover:text-[#a11d26]">
-          <IoEye size={24} />
-        </a>
-      ),
-    },
+    // {
+    //   title: "Action",
+    //   key: "action",
+    //   render: () => (
+    //     <a href="#" className="hover:text-[#a11d26]">
+    //       <IoEye size={24} />
+    //     </a>
+    //   ),
+    // },
   ];
 
   return (
@@ -87,7 +88,12 @@ function RecentSellingProduct() {
         dataSource={dataSource}
         columns={columns}
         loading={isLoading}
-        pagination={false}
+        size="middle"
+        pagination={{
+          onChange: (page) => setPage(page),
+          pageSize: data?.data?.meta?.limit,
+          total: data?.data?.meta?.total,
+        }}
       />
     </ConfigProvider>
   );

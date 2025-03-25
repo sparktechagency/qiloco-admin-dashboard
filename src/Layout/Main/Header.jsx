@@ -1,15 +1,17 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { FaRegBell } from "react-icons/fa6";
-import { Badge, Avatar } from "antd";
-
+import { Badge, Avatar, Popover } from "antd";
+import Spinner from "../../components/common/Spinner";
 import { CgMenu } from "react-icons/cg";
 import { useLocation } from "react-router-dom";
 import { imageUrl } from "../../redux/api/baseApi";
 import { useProfileQuery } from "../../redux/apiSlices/profileSlice";
+import NotificationPopover from "../../Pages/Notification/NotificationPopover";
 
 const Header = ({ toggleSidebar }) => {
-  const { data: profile } = useProfileQuery();
+  const [open, setOpen] = useState(false);
+  const { data: profile, isLoading, isError } = useProfileQuery();
   const user = profile?.data;
   const src = `${imageUrl}${user?.image}`;
 
@@ -28,6 +30,8 @@ const Header = ({ toggleSidebar }) => {
       .replace(/-/g, " ") // Replace hyphens with spaces
       .replace(/\b\w/g, (char) => char.toUpperCase()); // Capitalize first letter of each word
   };
+
+  if (isLoading) <Spinner />;
   return (
     <div className="bg-[#232323] min-h-[80px] flex items-center px-6  transition-all duration-300">
       {/* Sidebar Toggle Button */}
@@ -41,15 +45,26 @@ const Header = ({ toggleSidebar }) => {
 
       <div className="flex items-center gap-6 ml-auto ">
         {/* Notifications */}
-        <Link to="/notification" className="relative border rounded-full p-2">
-          <FaRegBell size={24} color="white" />
-          <Badge
-            count={10}
-            overflowCount={5}
-            size="small"
-            className="absolute top-1 -right-0 "
-          />
-        </Link>
+        <Popover
+          content={<NotificationPopover />}
+          title={null}
+          trigger="click"
+          arrow={false}
+          open={open}
+          onOpenChange={setOpen}
+          placement="bottom"
+          // overlayClassName="bg-gray-800 p-3 rounded-lg"
+        >
+          <div className="relative border rounded-full p-2 cursor-pointer">
+            <FaRegBell size={24} color="white" />
+            <Badge
+              count={10}
+              overflowCount={5}
+              size="small"
+              className="absolute top-1 -right-0"
+            />
+          </div>
+        </Popover>
 
         {/* User Profile */}
         <Link to="/my-profile" className="flex items-center gap-2 text-white ">

@@ -31,9 +31,9 @@ const productSlice = api.injectEndpoints({
     }),
 
     product: builder.query({
-      query: () => {
+      query: (page) => {
         return {
-          url: "/api/v1/product/",
+          url: `/api/v1/product?page=${page}`,
           method: "GET",
         };
       },

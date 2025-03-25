@@ -10,15 +10,16 @@ const orderSlice = api.injectEndpoints({
           body: { status }, // Send status as the body
         };
       },
-      invalidatesTags: ["Status"],
+      invalidatesTags: ["Orders"],
     }),
     getOrder: builder.query({
-      query: () => {
+      query: (page) => {
         return {
           method: "GET",
-          url: "/api/v1/orders",
+          url: `/api/v1/orders?page={page}`,
         };
       },
+      providesTags: ["Orders"],
     }),
   }),
 });

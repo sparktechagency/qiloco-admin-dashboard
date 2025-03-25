@@ -7,7 +7,9 @@ import { useEarningQuery } from "../../../redux/apiSlices/earningSlice";
 import dayjs from "dayjs";
 
 function Earnings() {
-  const { data: earnings } = useEarningQuery();
+  const [page, setPage] = useState(1);
+  const { data: earnings, isLoading } = useEarningQuery(page);
+
   const earningsTableData = earnings?.data?.earnings || [];
 
   // Calculate today's date in UTC format
@@ -32,32 +34,46 @@ function Earnings() {
 
   return (
     <div className="px-3">
-      <div className="w-[576px] h-14 flex justify-between my-4">
-        <div className="bg-[#121314] text-white flex items-center justify-evenly w-[278px] h-full rounded-lg">
+      <div className="w-full h-14 flex gap-10 my-4">
+        <div className="bg-[#121314] text-white flex items-center justify-evenly w-1/3 h-full rounded-lg">
           <LuArrowLeftRight size={25} />
           Today's Earning
           <span>${todayEarnings}</span>
         </div>
-        <div className="bg-[#121314] text-white flex items-center justify-evenly w-[278px] h-full rounded-lg">
+        <div className="bg-[#121314] text-white flex items-center justify-evenly w-1/3 h-full rounded-lg">
           <LuArrowLeftRight size={25} />
           All Earning
           <span>${totalEarnings}</span>
         </div>
       </div>
-      <EarningsTable earningsTableData={earningsTableData} />
+
+      {/* Pass required props */}
+      <EarningsTable
+        earningsTableData={earningsTableData}
+        page={page}
+        setPage={setPage}
+        earnings={earnings} // Pass full earnings data for pagination
+        isLoading={isLoading}
+      />
     </div>
   );
 }
 
 export default Earnings;
 
-const EarningsTable = ({ earningsTableData }) => {
+const EarningsTable = ({
+  earningsTableData,
+  page,
+  setPage,
+  earnings,
+  isLoading,
+}) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState(null);
 
   const showModal = (record) => {
-    setSelectedTransaction(record); // Store transaction details
-    setIsModalOpen(true); // Open modal
+    setSelectedTransaction(record);
+    setIsModalOpen(true);
   };
 
   const columns = [
@@ -65,7 +81,7 @@ const EarningsTable = ({ earningsTableData }) => {
       title: "Serial",
       dataIndex: "serial",
       key: "serial",
-      render: (text, record, index) => <>#{index + 1}</>,
+      render: (_, __, index) => <>#{index + 1}</>,
     },
     {
       title: "Order Id",
@@ -138,11 +154,21 @@ const EarningsTable = ({ earningsTableData }) => {
         }}
       >
         <div className="custom-table">
-          <Table columns={columns} dataSource={earningsTableData} pagination />
+          <Table
+            columns={columns}
+            dataSource={earningsTableData}
+            loading={isLoading}
+            size="middle"
+            pagination={{
+              current: page,
+              onChange: (page) => setPage(page),
+              pageSize: earnings?.data?.meta?.limit || 10,
+              total: earnings?.data?.meta?.total || 0,
+            }}
+          />
         </div>
       </ConfigProvider>
 
-      {/* Pass transaction details to modal */}
       <TransactionDetailsModal
         isModalOpen={isModalOpen}
         setIsModalOpen={setIsModalOpen}

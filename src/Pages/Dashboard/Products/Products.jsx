@@ -23,11 +23,12 @@ function ProductList() {
   const [productNameToDelete, setProductNameToDelete] = useState("");
   const [isEditMode, setIsEditMode] = useState(false);
   const [productToEdit, setProductToEdit] = useState(null);
+  const [page, setPage] = useState(1);
 
   const [deleteProduct] = useDeleteProductMutation();
   const [updateProduct] = useUpdateProductMutation();
 
-  const { data, isLoading, isError } = useProductQuery();
+  const { data, isLoading, isError } = useProductQuery(page);
   console.log("Product data from API:", data);
   const productList = data?.data?.products || [];
   console.log("Processed product list:", productList);
@@ -179,6 +180,7 @@ function ProductList() {
       >
         <div className="custom-table">
           <Table
+            size="middle"
             dataSource={dataSource}
             columns={columns(
               showDetailsModal,
@@ -186,7 +188,11 @@ function ProductList() {
               setIsDeleteModalOpen,
               setProductNameToDelete
             )}
-            pagination={true}
+            pagination={{
+              onChange: (page) => setPage(page),
+              pageSize: data?.data?.meta?.limit,
+              total: data?.data?.meta?.total,
+            }}
             loading={isLoading}
           />
         </div>
