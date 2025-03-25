@@ -10,10 +10,12 @@ const policySlice = api.injectEndpoints({
           body: updatedData,
         };
       },
+      invalidatesTags: ["Policies"],
     }),
 
     policy: builder.query({
       query: () => "/api/v1/settings",
+      providesTags: ["Policies"],
     }),
   }),
 });

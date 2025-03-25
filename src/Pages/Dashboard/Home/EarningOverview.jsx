@@ -83,7 +83,7 @@ export default function EarningOverview() {
               </div>
             }
             style={{
-              backgroundColor: "black", // Background black
+              backgroundColor: "#575958", // Background black
               color: "white", // Input text white
             }}
           />
