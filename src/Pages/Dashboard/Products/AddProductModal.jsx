@@ -9,7 +9,6 @@ import {
   Upload,
   Image,
   message,
-  InputNumber,
 } from "antd";
 import { RiUploadCloud2Line } from "react-icons/ri";
 import { AiOutlineDelete } from "react-icons/ai";
@@ -353,24 +352,6 @@ function ProductModal({ isModalOpen, setIsModalOpen, editProduct = null }) {
                   onFocus={() => setFocusedField("productPrice")}
                   onBlur={() => setFocusedField(null)}
                 />
-                {/* <Input
-                  type="number"
-                  placeholder="Enter your product price"
-                  controls={false} // Note: `controls` is not a valid prop for Ant Design Input
-                  className="border-none h-9 w-full flex items-center"
-                  style={{
-                    background: isEditMode ? "#f0f5ff" : "black",
-                    color: isEditMode ? "black" : "white",
-                  }}
-                  onFocus={() => setFocusedField("productPrice")}
-                  onBlur={() => setFocusedField(null)}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    if (/^\d*\.?\d*$/.test(value)) {
-                      setProductPrice(value); // Ensure the state only stores numbers
-                    }
-                  }}
-                /> */}
               </Form.Item>
 
               <Form.Item
@@ -418,7 +399,7 @@ function ProductModal({ isModalOpen, setIsModalOpen, editProduct = null }) {
                 />
               </Form.Item>
 
-              <Form.Item
+              {/* <Form.Item
                 name="filterMood"
                 label="Filter by mood [Tag]"
                 rules={[
@@ -449,8 +430,37 @@ function ProductModal({ isModalOpen, setIsModalOpen, editProduct = null }) {
                   <Select.Option value="Sad">Sad</Select.Option>
                   <Select.Option value="Medium">Medium</Select.Option>
                 </Select>
+              </Form.Item> */}
+              <Form.Item
+                name="filterMood"
+                label="Filter by mood [Tag]"
+                rules={[
+                  {
+                    required: true,
+                    message: "Please select a Tag",
+                  },
+                ]}
+              >
+                <Select
+                  placeholder="[Tag]"
+                  className={`border-none h-10 ${
+                    isEditMode ? "text-black" : "text-white"
+                  }`}
+                  style={{
+                    background: isEditMode ? "#f0f5ff" : "black",
+                  }}
+                  onFocus={() => setFocusedField("filterMood")}
+                  onBlur={() => setFocusedField(null)}
+                >
+                  <Select.Option value="Chill">Chill</Select.Option>
+                  <Select.Option value="Soothing">Soothing</Select.Option>
+                  <Select.Option value="Euphoric">Euphoric</Select.Option>
+                  <Select.Option value="Creative">Creative</Select.Option>
+                  <Select.Option value="Happy">Happy</Select.Option>
+                  <Select.Option value="Sad">Sad</Select.Option>
+                  <Select.Option value="Medium">Medium</Select.Option>
+                </Select>
               </Form.Item>
-
               <Form.Item label="Potency" name="productPotency">
                 <Input
                   placeholder="Enter your Product Potency"
