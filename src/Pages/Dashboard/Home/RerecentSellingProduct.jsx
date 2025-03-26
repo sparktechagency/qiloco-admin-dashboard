@@ -1,7 +1,5 @@
 import React, { useState } from "react";
 import { Table, Avatar, ConfigProvider } from "antd";
-import { IoEye } from "react-icons/io5";
-import productImg from "../../../assets/quiloco/productImg.png";
 import { useGetRecentProductQuery } from "../../../redux/apiSlices/overViewSlice";
 
 function RecentSellingProduct() {
@@ -15,14 +13,14 @@ function RecentSellingProduct() {
   const dataSource = earnings.map((item, index) => ({
     key: item._id,
     serial: `#${index + 1}`,
-    productName: item.productName || "N/A", // Provide fallback if missing
+    productName: item.productName || "N/A",
     email: item.email,
     createdAt: new Intl.DateTimeFormat("en-US", {
       year: "numeric",
       month: "short",
       day: "numeric",
     }).format(new Date(item.createdAt)),
-    totalPrice: `$${item.totalPrice.toLocaleString()}`,
+    totalPrice: `$${parseFloat(item.totalPrice).toFixed(2)}`,
   }));
 
   const columns = [
@@ -31,17 +29,17 @@ function RecentSellingProduct() {
       dataIndex: "serial",
       key: "serial",
     },
-    {
-      title: "Product Name",
-      dataIndex: "productName",
-      key: "productName",
-      render: (text) => (
-        <div className="flex items-center gap-2">
-          <Avatar shape="square" size="default" src={productImg} />
-          <span>{text}</span>
-        </div>
-      ),
-    },
+    // {
+    //   title: "Product Name",
+    //   dataIndex: "productName",
+    //   key: "productName",
+    //   render: (text) => (
+    //     <div className="flex items-center gap-2">
+    //       <Avatar shape="square" size="default" src={productImg} />
+    //       <span>{text}</span>
+    //     </div>
+    //   ),
+    // },
     {
       title: "User Email",
       dataIndex: "email",

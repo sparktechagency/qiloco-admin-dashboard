@@ -38,12 +38,12 @@ function Earnings() {
         <div className="bg-[#121314] text-white flex items-center justify-evenly w-1/3 h-full rounded-lg">
           <LuArrowLeftRight size={25} />
           Today's Earning
-          <span>${todayEarnings}</span>
+          <span>${parseFloat(todayEarnings).toFixed(2)}</span>
         </div>
         <div className="bg-[#121314] text-white flex items-center justify-evenly w-1/3 h-full rounded-lg">
           <LuArrowLeftRight size={25} />
           All Earning
-          <span>${totalEarnings}</span>
+          <span>${parseFloat(totalEarnings).toFixed(2)}</span>
         </div>
       </div>
 
@@ -110,7 +110,7 @@ const EarningsTable = ({
       title: "Amount",
       dataIndex: "earning",
       key: "earning",
-      render: (text) => `$${text}`,
+      render: (earning) => `$${parseFloat(earning).toFixed(2)}`,
     },
     {
       title: "Status",

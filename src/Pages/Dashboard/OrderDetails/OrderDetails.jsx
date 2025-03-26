@@ -116,7 +116,7 @@ function OrderDetails() {
       key: "productname",
       render: (_, record) => (
         <div className="flex items-center gap-2">
-          <Avatar shape="square" size="default" src={record.pic} />
+          {/* <Avatar shape="square" size="default" src={record.pic} /> */}
           <span>{record.productname}</span>
         </div>
       ),

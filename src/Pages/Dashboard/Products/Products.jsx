@@ -89,7 +89,7 @@ function ProductList() {
     serial: `#${index + 1}`,
     productName: item.name,
     productPotency: item.potency,
-    productPrice: `$${item.price.toFixed(2)}`,
+    productPrice: `$${parseFloat(item.price).toFixed(2)}`,
     productGenetics: item.genetics,
     productOrigin: item.origin,
     productType: item.type,

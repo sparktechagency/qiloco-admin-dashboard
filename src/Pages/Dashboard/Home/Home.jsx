@@ -21,7 +21,7 @@ const Home = () => {
     },
     {
       label: "Total Earning",
-      value: totalData?.totalRevenue,
+      value: `$${parseFloat(totalData?.totalRevenue).toFixed(2)}`,
       icon: <PiCurrencyCircleDollarBold size={60} className="text-white" />,
       bg: "bg-quilocoS",
     },
