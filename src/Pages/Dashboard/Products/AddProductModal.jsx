@@ -399,38 +399,6 @@ function ProductModal({ isModalOpen, setIsModalOpen, editProduct = null }) {
                 />
               </Form.Item>
 
-              {/* <Form.Item
-                name="filterMood"
-                label="Filter by mood [Tag]"
-                rules={[
-                  {
-                    required: true,
-                    message: "Please select Tags",
-                    type: "array",
-                  },
-                ]}
-              >
-                <Select
-                  mode="multiple"
-                  placeholder="[Tag]"
-                  className={`border-none h-10 ${
-                    isEditMode ? "text-black" : "text-white"
-                  }`}
-                  style={{
-                    background: isEditMode ? "#f0f5ff" : "black",
-                  }}
-                  onFocus={() => setFocusedField("filterMood")}
-                  onBlur={() => setFocusedField(null)}
-                >
-                  <Select.Option value="Chill">Chill</Select.Option>
-                  <Select.Option value="Soothing">Soothing</Select.Option>
-                  <Select.Option value="Euphoric">Euphoric</Select.Option>
-                  <Select.Option value="Creative">Creative</Select.Option>
-                  <Select.Option value="Happy">Happy</Select.Option>
-                  <Select.Option value="Sad">Sad</Select.Option>
-                  <Select.Option value="Medium">Medium</Select.Option>
-                </Select>
-              </Form.Item> */}
               <Form.Item
                 name="filterMood"
                 label="Filter by mood [Tag]"

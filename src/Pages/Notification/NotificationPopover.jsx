@@ -150,64 +150,60 @@ function NotificationPopover() {
             </div>
             <div className="overflow-y-auto px-2 py-1">
               {displayedNotifications.map((item) => (
-                <Link to="/orderDetails">
-                  <div
-                    key={item._id}
-                    onClick={() => handleNotificationClick(item)}
-                    className={`w-full min-h-16 flex items-start justify-between gap-3 p-3 my-1 rounded-md cursor-pointer hover:bg-gray-800 ${
-                      !item.read ? "bg-gray-900" : ""
-                    }`}
-                  >
-                    <div className="flex items-start gap-3 flex-1 bg-red-300">
-                      <div className="h-8 w-8 rounded-full bg-gray-500 flex items-center justify-center mt-1">
-                        {item.type === "ORDER" ? "🛒" : "✉️"}
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between mb-1">
-                          {item.type && (
-                            <Tag color={getTypeColor(item.type)}>
-                              {item.type}
-                            </Tag>
-                          )}
-                          <span className="text-xs text-gray-500">
-                            {formatTime(item.createdAt)}
-                          </span>
-                        </div>
-                        <p className="text-white font-medium">{item.title}</p>
-                        <p className="text-gray-300 text-xs whitespace-pre-line">
-                          {item.message}
-                        </p>
-                        {item.read && (
-                          <div className="flex items-center mt-1 text-xs text-gray-500">
-                            <CheckCircleOutlined className="mr-1" /> Read
-                          </div>
-                        )}
-                      </div>
+                <div
+                  key={item._id}
+                  onClick={() => handleNotificationClick(item)}
+                  className={`w-full min-h-16 flex items-start justify-between gap-3 p-3 my-1 rounded-md cursor-pointer hover:bg-gray-800 ${
+                    !item.read ? "bg-gray-900" : ""
+                  }`}
+                >
+                  <div className="flex items-start gap-3 flex-1">
+                    <div className="h-8 w-8 rounded-full bg-gray-500 flex items-center justify-center mt-1">
+                      {item.type === "ORDER" ? "🛒" : "✉️"}
                     </div>
-                    <div className="flex gap-1">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          markAsRead(item._id);
-                        }}
-                        className="text-gray-400 hover:text-white"
-                        title="Mark as read"
-                      >
-                        <MdOutlineMarkEmailRead size={16} />
-                      </button>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          removeMessage(item._id);
-                        }}
-                        className="text-gray-400 hover:text-red-500"
-                        title="Delete"
-                      >
-                        <MdCancel size={16} />
-                      </button>
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between mb-1">
+                        {item.type && (
+                          <Tag color={getTypeColor(item.type)}>{item.type}</Tag>
+                        )}
+                        <span className="text-xs text-gray-500">
+                          {formatTime(item.createdAt)}
+                        </span>
+                      </div>
+                      <p className="text-white font-medium">{item.title}</p>
+                      <p className="text-gray-300 text-xs whitespace-pre-line">
+                        {item.message}
+                      </p>
+                      {item.read && (
+                        <div className="flex items-center mt-1 text-xs text-gray-500">
+                          <CheckCircleOutlined className="mr-1" /> Read
+                        </div>
+                      )}
                     </div>
                   </div>
-                </Link>
+                  <div className="flex gap-1">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        markAsRead(item._id);
+                      }}
+                      className="text-gray-400 hover:text-white"
+                      title="Mark as read"
+                    >
+                      <MdOutlineMarkEmailRead size={16} />
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        removeMessage(item._id);
+                      }}
+                      className="text-gray-400 hover:text-red-500"
+                      title="Delete"
+                    >
+                      <MdCancel size={16} />
+                    </button>
+                  </div>
+                </div>
               ))}
             </div>
             <div className="border-t border-gray-700 p-2 flex justify-between items-center">
@@ -249,3 +245,4 @@ function NotificationPopover() {
 }
 
 export default NotificationPopover;
+

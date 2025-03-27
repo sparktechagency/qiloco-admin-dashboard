@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { FaRegBell } from "react-icons/fa6";
 import { Badge, Avatar, Popover } from "antd";
@@ -8,12 +8,28 @@ import { useLocation } from "react-router-dom";
 import { imageUrl } from "../../redux/api/baseApi";
 import { useProfileQuery } from "../../redux/apiSlices/profileSlice";
 import NotificationPopover from "../../Pages/Notification/NotificationPopover";
-
+import io from "socket.io-client";
+import { useNotificationQuery } from "../../redux/apiSlices/notificationSlice";
 const Header = ({ toggleSidebar }) => {
+  const socketRef = useRef(null);
   const [open, setOpen] = useState(false);
   const { data: profile, isLoading, isError } = useProfileQuery();
   const user = profile?.data;
   const src = `${imageUrl}${user?.image}`;
+  const {
+    data: notifications,
+    refetch,
+    isLoading: notificationLoading,
+  } = useNotificationQuery();
+
+  // console.log(
+  //   "dd",
+  //   notifications?.data?.result?.filter((notification) => !notification.read)
+  //     .length
+  // );
+  const unreadNotification = notifications?.data?.result?.filter(
+    (notification) => !notification.read
+  ).length;
 
   const location = useLocation();
 
@@ -58,7 +74,7 @@ const Header = ({ toggleSidebar }) => {
           <div className="relative border rounded-full p-2 cursor-pointer">
             <FaRegBell size={24} color="white" />
             <Badge
-              count={10}
+              count={unreadNotification}
               overflowCount={5}
               size="small"
               className="absolute top-1 -right-0"

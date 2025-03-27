@@ -164,13 +164,7 @@ function OrderDetails() {
                 "Processing"
               )}
             </Menu.Item>
-            <Menu.Item key="cancel">
-              {updatingOrderId === record.key && isUpdating ? (
-                <Spin size="small" />
-              ) : (
-                "Cancel"
-              )}
-            </Menu.Item>
+
             <Menu.Item key="delivered">
               {updatingOrderId === record.key && isUpdating ? (
                 <Spin size="small" />
