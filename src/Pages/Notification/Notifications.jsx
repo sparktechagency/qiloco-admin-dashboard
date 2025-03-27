@@ -6,12 +6,14 @@ import { FaRegBell } from "react-icons/fa";
 import moment from "moment";
 import {
   useNotificationQuery,
+  useReadAllMutation,
   useReadMutation,
 } from "../../redux/apiSlices/notificationSlice";
 
 const Notifications = ({ profile }) => {
   const [page, setPage] = useState(1);
   const socketRef = useRef(null);
+
   const {
     data: notifications,
     refetch,
@@ -19,28 +21,43 @@ const Notifications = ({ profile }) => {
   } = useNotificationQuery();
 
   const [readNotification, { isLoading: updateLoading }] = useReadMutation();
-  const [readAllNotifications] = useReadMutation();
+  const [readAllNotifications, { isLoading: readAllLoading }] =
+    useReadAllMutation();
 
   useEffect(() => {
-    socketRef.current = io("http://10.0.60.126:6007");
+    if (!profile?.data?._id) return;
 
-    const handleNewNotification = () => {
+    // Connect to WebSocket server with automatic reconnection
+    socketRef.current = io("http://10.0.60.126:6007", {
+      reconnection: true,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 2000,
+    });
+
+    // Log connection status
+    socketRef.current.on("connect", () => {
+      console.log("Connected to WebSocket server");
+    });
+
+    socketRef.current.on("connect_error", (err) => {
+      console.error("Socket connection error:", err);
+    });
+
+    // Listen for real-time notifications
+    const handleNewNotification = (data) => {
+      console.log("New notification received:", data);
       refetch();
     };
 
-    if (profile?.data?._id) {
-      socketRef.current.on(
-        `notification::${profile.data._id}`,
-        handleNewNotification
-      );
-    }
+    const eventChannel = `notification::${profile.data._id}`;
+    console.log(`Listening to ${eventChannel}`);
+
+    socketRef.current.on(eventChannel, handleNewNotification);
 
     return () => {
       if (socketRef.current) {
-        socketRef.current.off(
-          `notification::${profile?.data?._id}`,
-          handleNewNotification
-        );
+        console.log(`Unsubscribing from ${eventChannel}`);
+        socketRef.current.off(eventChannel, handleNewNotification);
         socketRef.current.disconnect();
       }
     };
@@ -50,8 +67,10 @@ const Notifications = ({ profile }) => {
     try {
       await readNotification(id);
       refetch();
+      toast.success("Notification marked as read!");
     } catch (error) {
       console.error("Error marking notification as read:", error);
+      toast.error("Failed to mark as read.");
     }
   };
 
@@ -59,8 +78,10 @@ const Notifications = ({ profile }) => {
     try {
       await readAllNotifications();
       refetch();
+      toast.success("All notifications marked as read!");
     } catch (error) {
       console.error("Error marking all notifications as read:", error);
+      toast.error("Failed to mark all as read.");
     }
   };
 
@@ -79,9 +100,9 @@ const Notifications = ({ profile }) => {
         <button
           className="bg-gtdandy h-10 px-4 rounded-md"
           onClick={markAllAsRead}
-          disabled={updateLoading}
+          disabled={readAllLoading}
         >
-          {updateLoading ? "Loading..." : "Read All"}
+          {readAllLoading ? "Loading..." : "Read All"}
         </button>
       </div>
 

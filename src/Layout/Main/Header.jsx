@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { FaRegBell } from "react-icons/fa6";
 import { Badge, Avatar, Popover } from "antd";
@@ -10,23 +10,20 @@ import { useProfileQuery } from "../../redux/apiSlices/profileSlice";
 import NotificationPopover from "../../Pages/Notification/NotificationPopover";
 import io from "socket.io-client";
 import { useNotificationQuery } from "../../redux/apiSlices/notificationSlice";
+
 const Header = ({ toggleSidebar }) => {
   const socketRef = useRef(null);
   const [open, setOpen] = useState(false);
-  const { data: profile, isLoading, isError } = useProfileQuery();
+  const { data: profile, isLoading } = useProfileQuery();
   const user = profile?.data;
   const src = `${imageUrl}${user?.image}`;
+
   const {
     data: notifications,
     refetch,
     isLoading: notificationLoading,
   } = useNotificationQuery();
 
-  // console.log(
-  //   "dd",
-  //   notifications?.data?.result?.filter((notification) => !notification.read)
-  //     .length
-  // );
   const unreadNotification = notifications?.data?.result?.filter(
     (notification) => !notification.read
   ).length;
@@ -37,20 +34,32 @@ const Header = ({ toggleSidebar }) => {
     const path = location.pathname;
     if (path === "/") return "Dashboard";
 
-    // Remove leading slash and get the last part of the path
     const pageName = path.substring(1).split("/").pop();
 
-    // Insert a space before capital letters (except the first one)
     return pageName
-      .replace(/([a-z])([A-Z])/g, "$1 $2") // Add space before uppercase letters
-      .replace(/-/g, " ") // Replace hyphens with spaces
-      .replace(/\b\w/g, (char) => char.toUpperCase()); // Capitalize first letter of each word
+      .replace(/([a-z])([A-Z])/g, "$1 $2")
+      .replace(/-/g, " ")
+      .replace(/\b\w/g, (char) => char.toUpperCase());
   };
 
-  if (isLoading) <Spinner />;
+  useEffect(() => {
+    socketRef.current = io("YOUR_BACKEND_SOCKET_URL", {
+      transports: ["websocket"],
+    });
+
+    socketRef.current.on("newNotification", () => {
+      refetch(); // Fetch new notifications when a new one arrives
+    });
+
+    return () => {
+      socketRef.current.disconnect(); // Cleanup on unmount
+    };
+  }, [refetch]);
+
+  if (isLoading) return <Spinner />;
+
   return (
-    <div className="bg-[#232323] min-h-[80px] flex items-center px-6  transition-all duration-300">
-      {/* Sidebar Toggle Button */}
+    <div className="bg-[#232323] min-h-[80px] flex items-center px-6 transition-all duration-300">
       <CgMenu
         size={40}
         onClick={toggleSidebar}
@@ -59,8 +68,7 @@ const Header = ({ toggleSidebar }) => {
 
       <h1 className="text-2xl text-white ml-4">{getPageName()}</h1>
 
-      <div className="flex items-center gap-6 ml-auto ">
-        {/* Notifications */}
+      <div className="flex items-center gap-6 ml-auto">
         <Popover
           content={<NotificationPopover />}
           title={null}
@@ -69,7 +77,6 @@ const Header = ({ toggleSidebar }) => {
           open={open}
           onOpenChange={setOpen}
           placement="bottom"
-          // overlayClassName="bg-gray-800 p-3 rounded-lg"
         >
           <div className="relative border rounded-full p-2 cursor-pointer">
             <FaRegBell size={24} color="white" />
@@ -82,12 +89,10 @@ const Header = ({ toggleSidebar }) => {
           </div>
         </Popover>
 
-        {/* User Profile */}
-        <Link to="/my-profile" className="flex items-center gap-2 text-white ">
-          <div className="border rounded-full ">
+        <Link to="/my-profile" className="flex items-center gap-2 text-white">
+          <div className="border rounded-full">
             <Avatar size={40} src={src} />
           </div>
-
           <p>{user?.name}</p>
         </Link>
       </div>

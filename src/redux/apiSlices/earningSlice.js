@@ -9,6 +9,7 @@ const earningSlice = api.injectEndpoints({
           method: "GET",
         };
       },
+      providesTags: ["Earnings"]
     }),
   }),
 });

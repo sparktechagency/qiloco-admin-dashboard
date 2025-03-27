@@ -24,12 +24,17 @@ import PrivacyPolicy from "../Pages/Dashboard/Policy/PrivacyPolicy.jsx";
 import RecentSellingProduct from "../Pages/Dashboard/RecentSellingProduct/RecentSellingProduct.jsx";
 import Setting from "../Pages/Dashboard/Profile/Setting.jsx";
 import Notifications from "../Pages/Notification/Notifications.jsx";
+import ProtectedRoute from "./ProtectedRoute.jsx";
 
 const router = createBrowserRouter([
   {
     path: "/",
 
-    element: <Main />,
+    element: (
+      <ProtectedRoute>
+        <Main />
+      </ProtectedRoute>
+    ),
     children: [
       {
         path: "/",

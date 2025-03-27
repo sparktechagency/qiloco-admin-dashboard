@@ -9,6 +9,7 @@ const authSlice = api.injectEndpoints({
           url: `/api/v1/admin/dashboard/products?page=${page}`,
         };
       },
+      invalidatesTags: ["Overview"],
     }),
     getEarningData: builder.query({
       query: (year) => {
@@ -17,6 +18,7 @@ const authSlice = api.injectEndpoints({
           url: `/api/v1/admin/dashboard/erarming?year=${year}`,
         };
       },
+      invalidatesTags: ["Overview"],
     }),
     getPrdouctSalingData: builder.query({
       query: (year) => {
@@ -25,6 +27,7 @@ const authSlice = api.injectEndpoints({
           url: `/api/v1/admin/dashboard/overview?year=${year}`,
         };
       },
+      providesTags: ["Overview"],
     }),
 
     getTotal: builder.query({
@@ -34,6 +37,7 @@ const authSlice = api.injectEndpoints({
           url: "/api/v1/admin/dashboard",
         };
       },
+      providesTags: ["Overview"],
     }),
   }),
 });

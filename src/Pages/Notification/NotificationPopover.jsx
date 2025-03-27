@@ -108,9 +108,9 @@ function NotificationPopover() {
 
   const unreadCount =
     notifications?.data?.result?.filter((notif) => !notif.read).length || 0;
-  const displayedNotifications = showAll
-    ? notifications?.data?.result
-    : notifications?.data?.result?.slice(0, 5);
+
+  // Show only the last 5 notifications
+  const displayedNotifications = notifications?.data?.result?.slice(-5);
 
   console.log(displayedNotifications);
   return (
@@ -139,16 +139,24 @@ function NotificationPopover() {
           <>
             <div className="flex justify-between items-center px-4 py-2 border-b border-gray-700">
               <h3 className="text-white font-medium">Notifications</h3>
-              {unreadCount > 0 && (
+              {/* {unreadCount > 0 && (
                 <button
                   onClick={markAllAsRead}
                   className="text-xs text-blue-400 hover:text-blue-300"
                 >
                   Mark all as read
                 </button>
-              )}
+              )} */}
             </div>
-            <div className="overflow-y-auto px-2 py-1">
+            <div
+              className="overflow-y-auto px-2 py-1  [&::-webkit-scrollbar]:w-1
+                    [&::-webkit-scrollbar-track]:rounded-full
+                    [&::-webkit-scrollbar-track]:bg-gray-100
+                    [&::-webkit-scrollbar-thumb]:rounded-full
+                    [&::-webkit-scrollbar-thumb]:bg-gray-300
+                    dark:[&::-webkit-scrollbar-track]:bg-neutral-700
+                    dark:[&::-webkit-scrollbar-thumb]:bg-neutral-500"
+            >
               {displayedNotifications.map((item) => (
                 <div
                   key={item._id}
@@ -175,7 +183,7 @@ function NotificationPopover() {
                         {item.message}
                       </p>
                       {item.read && (
-                        <div className="flex items-center mt-1 text-xs text-gray-500">
+                        <div className="flex items-center mt-1 text-xs text-green-800">
                           <CheckCircleOutlined className="mr-1" /> Read
                         </div>
                       )}
@@ -245,4 +253,3 @@ function NotificationPopover() {
 }
 
 export default NotificationPopover;
-

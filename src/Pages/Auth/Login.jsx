@@ -7,7 +7,7 @@ import Spinner from "../../components/common/Spinner";
 
 const Login = () => {
   const navigate = useNavigate();
-  const [login, { isLoading, error }] = useLoginMutation();
+  const [login, { isLoading }] = useLoginMutation();
 
   const onFinish = async (values) => {
     console.log(values);
@@ -19,8 +19,16 @@ const Login = () => {
 
       console.log("Login Success:", response);
       localStorage.setItem("token", response?.data?.token);
+      localStorage.setItem("Super", response?.data?.user?.role);
       // localStorage.setItem("loginUser",)
-      navigate("/");
+      if (
+        response?.data?.user?.role === "SUPER_ADMIN" ||
+        response?.data?.user?.role === "ADMIN"
+      ) {
+        navigate("/");
+      } else {
+        message.error("Unauthorized People");
+      }
     } catch (err) {
       message.error(err);
       console.error("Login Failed:", err);
