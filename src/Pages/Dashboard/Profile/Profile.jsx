@@ -5,17 +5,18 @@ import { Button, ConfigProvider, Form, Input, Upload, message } from "antd";
 import { HiMiniPencil } from "react-icons/hi2";
 
 import { imageUrl } from "../../../redux/api/baseApi";
+
+import { useUser } from "../../../provider/User";
 import {
   useProfileQuery,
   useUpdateProfileMutation,
 } from "../../../redux/apiSlices/profileSlice";
-import Spinner from "../../../components/common/Spinner";
 
 function Profile() {
+  const { data: profile, isLoading } = useProfileQuery();
   const [showButton, setShowButton] = useState(false);
   const [uploadedImage, setUploadedImage] = useState(null);
-  const { data: profile } = useProfileQuery();
-  const user = profile?.data;
+  const user = profile?.data || {}; // Ensure user is always an object
 
   return (
     <ConfigProvider
@@ -33,65 +34,66 @@ function Profile() {
     >
       <div className="bg-quilocoP w-[50%] min-h-72 flex flex-col justify-start items-center px-4 rounded-lg">
         <div className="relative mt-6 flex flex-col items-center justify-center">
-          <img
-            src={
-              uploadedImage
-                ? URL.createObjectURL(uploadedImage)
-                : user?.image
-                ? `${imageUrl}${user.image}`
-                : man
-            }
-            width={120}
-            height={120}
-            className="border border-slate-500 rounded-full object-cover"
-          />
-          {showButton && (
-            <Upload
-              showUploadList={false}
-              beforeUpload={(file) => {
-                const isImage = file.type.startsWith("image/");
-                if (!isImage) {
-                  message.error("You can only upload image files!");
-                  return Upload.LIST_IGNORE;
-                }
-                setUploadedImage(file);
-                return false; // Prevent auto upload
-              }}
-            >
-              <button>
-                <FaFeather
-                  size={30}
-                  className="text-quilocoD absolute top-16 left-28 rounded-full bg-black p-1"
-                />
-              </button>
-            </Upload>
-          )}
+          {/* Image Wrapper */}
+          <div className=" w-[120px]  h-[120px] overflow-hidden  rounded-full border border-slate-500">
+            <img
+              src={
+                uploadedImage
+                  ? URL.createObjectURL(uploadedImage)
+                  : user?.image
+                  ? `${imageUrl}${user.image}`
+                  : man
+              }
+              className="w-full h-full object-cover"
+            />
+            {showButton && (
+              <Upload
+                showUploadList={false}
+                beforeUpload={(file) => {
+                  if (!file.type.startsWith("image/")) {
+                    message.error("You can only upload image files!");
+                    return Upload.LIST_IGNORE;
+                  }
+                  setUploadedImage(file);
+                  return false;
+                }}
+              >
+                <button className="absolute top-20 right-12 bg-black p-1 z-50 rounded-full">
+                  <FaFeather size={24} className="text-quilocoD" />
+                </button>
+              </Upload>
+            )}
+          </div>
           <h3 className="text-slate-50 text-xl mt-3">
-            {user?.name || "Unknown User"}
+            {user?.name || "Administrator"}
           </h3>
         </div>
         <div className="w-full flex justify-end">
           <Button
             onClick={() => {
               setShowButton(!showButton);
-              if (!showButton) setUploadedImage(null); // Reset image when canceling edit
+              if (!showButton) setUploadedImage(null);
             }}
             icon={
-              showButton ? null : (
-                <HiMiniPencil size={20} className="text-white" />
-              )
+              !showButton && <HiMiniPencil size={20} className="text-white" />
             }
             className="bg-quilocoD/80 border-none text-white min-w-20 min-h-8 text-xs rounded-lg"
           >
             {showButton ? "Cancel" : "Edit Profile"}
           </Button>
         </div>
-        <ProfileDetails
-          showButton={showButton}
-          setShowButton={setShowButton}
-          user={user}
-          uploadedImage={uploadedImage}
-        />
+
+        {/* Show loading message while fetching data */}
+        {!isLoading && user ? (
+          <ProfileDetails
+            showButton={showButton}
+            setShowButton={setShowButton}
+            user={user}
+            uploadedImage={uploadedImage}
+          />
+        ) : (
+          <p className="text-white">Loading profile...</p>
+        )}
       </div>
     </ConfigProvider>
   );
@@ -99,30 +101,32 @@ function Profile() {
 
 export default Profile;
 
-const ProfileDetails = ({ showButton, setShowButton, user, uploadedImage }) => {
+const ProfileDetails = ({
+  showButton,
+  setShowButton,
+  user = {},
+  uploadedImage,
+}) => {
   const [form] = Form.useForm();
-  // const { updateUser } = useUser(); // Assuming there's an updateUser function
+  const { updateUser } = useUser();
   const [updateProfile, { isLoading }] = useUpdateProfileMutation();
 
-  // Reset form when user data changes or editing mode changes
+  // Reset form when user data changes
   React.useEffect(() => {
     if (user) {
       form.setFieldsValue({
-        name: user.name,
-        email: user.email,
-        phone: user.phoneNumber,
-        role: user.role,
+        name: user?.name || "",
+        email: user?.email || "",
+        phone: user?.phoneNumber || "",
+        role: user?.role || "N/A",
       });
     }
   }, [user, form]);
-
-  console.log("userss", user);
 
   const handleFinish = async (values) => {
     try {
       const formData = new FormData();
 
-      // Append the image file
       if (uploadedImage) {
         formData.append("image", uploadedImage);
       }
@@ -132,21 +136,15 @@ const ProfileDetails = ({ showButton, setShowButton, user, uploadedImage }) => {
         phoneNumber: values.phone,
       };
 
-      // Append data as separate fields inside the "data" object
-      // formData.append("data[name]", values.name); // data[name]
-      formData.append("data", JSON.stringify(data)); // data[phoneNumber]
+      formData.append("data", JSON.stringify(data));
 
-      // Log FormData content to check if it's correct
-      for (let [key, value] of formData.entries()) {
-        console.log(key, value); // Check the form data being sent
-      }
-
-      // Sending FormData with the mutation
       const response = await updateProfile(formData).unwrap();
-      console.log(response);
       if (response.success) {
         message.success("Profile updated successfully!");
         setShowButton(false);
+        if (updateUser && response.data) {
+          updateUser(response.data);
+        }
       }
     } catch (error) {
       console.error("Profile update failed:", error);
@@ -154,7 +152,6 @@ const ProfileDetails = ({ showButton, setShowButton, user, uploadedImage }) => {
     }
   };
 
-  if (isLoading) <Spinner />;
   return (
     <ConfigProvider
       theme={{
@@ -225,7 +222,7 @@ const ProfileDetails = ({ showButton, setShowButton, user, uploadedImage }) => {
           >
             <Input
               readOnly
-              value={user.role}
+              value={user?.role || "N/A"}
               className="bg-black border-none h-12 text-slate-300"
             />
           </Form.Item>

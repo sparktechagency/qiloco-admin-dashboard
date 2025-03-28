@@ -5,6 +5,7 @@ import { IoEye } from "react-icons/io5";
 import TransactionDetailsModal from "./TransactionDetailsModal";
 import { useEarningQuery } from "../../../redux/apiSlices/earningSlice";
 import dayjs from "dayjs";
+import Loading from "../../../components/common/Loading";
 
 function Earnings() {
   const [page, setPage] = useState(1);
@@ -136,6 +137,8 @@ const EarningsTable = ({
     },
   ];
 
+  if (isLoading) return <Loading />;
+
   return (
     <div>
       <ConfigProvider
@@ -157,7 +160,6 @@ const EarningsTable = ({
           <Table
             columns={columns}
             dataSource={earningsTableData}
-            loading={isLoading}
             size="middle"
             pagination={{
               current: page,

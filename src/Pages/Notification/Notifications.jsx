@@ -9,6 +9,7 @@ import {
   useReadAllMutation,
   useReadMutation,
 } from "../../redux/apiSlices/notificationSlice";
+import Loading from "../../components/common/Loading";
 
 const Notifications = ({ profile }) => {
   const [page, setPage] = useState(1);
@@ -58,7 +59,8 @@ const Notifications = ({ profile }) => {
       if (socketRef.current) {
         console.log(`Unsubscribing from ${eventChannel}`);
         socketRef.current.off(eventChannel, handleNewNotification);
-        socketRef.current.disconnect();
+        socketRef.current.close(); // Close connection properly
+        socketRef.current = null;
       }
     };
   }, [refetch, profile?.data?._id]);
@@ -90,22 +92,28 @@ const Notifications = ({ profile }) => {
 
   const unreadCount =
     notifications?.data?.result?.filter((notif) => !notif.read).length || 0;
+  const totalNotifications = notifications?.data?.total || 0;
+
   const displayedNotifications =
     notifications?.data?.result?.slice((page - 1) * 5, page * 5) || [];
 
-  return (
+  return notificationLoading ? (
+    <Loading />
+  ) : (
     <div className="px-4">
+      {/* Header Section */}
       <div className="flex items-center justify-between mb-3 text-white">
         <h2 className="text-[22px]">All Notifications</h2>
         <button
           className="bg-gtdandy h-10 px-4 rounded-md"
           onClick={markAllAsRead}
-          disabled={readAllLoading}
+          disabled={readAllLoading || unreadCount === 0}
         >
           {readAllLoading ? "Loading..." : "Read All"}
         </button>
       </div>
 
+      {/* Notifications List */}
       <div className="grid grid-cols-1 gap-5">
         {displayedNotifications.length > 0 ? (
           displayedNotifications.map((notification, index) => (
@@ -129,7 +137,7 @@ const Notifications = ({ profile }) => {
                   onClick={() => markAsRead(notification._id)}
                   disabled={updateLoading}
                 >
-                  Mark as Read
+                  {updateLoading ? "Processing..." : "Mark as Read"}
                 </button>
               )}
             </div>
@@ -139,6 +147,7 @@ const Notifications = ({ profile }) => {
         )}
       </div>
 
+      {/* Pagination */}
       <div className="flex items-center justify-center mt-6">
         <ConfigProvider
           theme={{
@@ -155,7 +164,7 @@ const Notifications = ({ profile }) => {
         >
           <Pagination
             current={page}
-            total={notifications?.data?.total || 0}
+            total={totalNotifications}
             onChange={(page) => setPage(page)}
             pageSize={5}
             showQuickJumper={false}

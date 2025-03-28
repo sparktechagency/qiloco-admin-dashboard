@@ -17,6 +17,7 @@ import {
   useUpdateOrderStatusMutation,
 } from "../../../redux/apiSlices/orderSlice";
 import { getImageUrl } from "../../../components/common/ImageUrl";
+import Loading from "../../../components/common/Loading";
 
 function OrderDetails() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -201,6 +202,7 @@ function OrderDetails() {
     },
   ];
 
+  if (isLoading) return <Loading />;
   return (
     <>
       <div className="px-3 py-4">

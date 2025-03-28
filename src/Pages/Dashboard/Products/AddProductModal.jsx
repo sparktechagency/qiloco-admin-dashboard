@@ -344,7 +344,7 @@ function ProductModal({ isModalOpen, setIsModalOpen, editProduct = null }) {
                   type="number"
                   placeholder="Enter your product price"
                   controls={false}
-                  className="border-none h-10 w-full text-white flex items-center"
+                  className="border-none h-10 w-full  flex items-center"
                   style={{
                     background: isEditMode ? "#f0f5ff" : "black",
                     colorText: isEditMode ? "black" : "white",
@@ -535,25 +535,32 @@ function ProductModal({ isModalOpen, setIsModalOpen, editProduct = null }) {
                 </Upload>
 
                 {/* Display Uploaded Images Below */}
-                <div
-                  style={{
-                    marginTop: 10,
-                    display: "flex",
-                    flexWrap: "wrap",
-                    gap: "10px",
-                  }}
-                >
+                <div className="mt-2 flex flex-wrap gap-10">
                   {fileList.map((file) => (
                     <div
                       key={file.uid}
-                      style={{
-                        position: "relative",
-                        display: "flex",
-                        alignItems: "center",
-                      }}
-                      className="w-full flex justify-between border rounded-md p-1.5"
+                      className="relative w-full flex items-center justify-between border rounded-md p-1.5"
                     >
-                      <Image
+                      {isCreating ? (
+                        <Image
+                          src={URL.createObjectURL(file.originFileObj)}
+                          width={60}
+                          height={60}
+                          style={{ borderRadius: "5px", objectFit: "cover" }}
+                        />
+                      ) : (
+                        <Image
+                          src={
+                            file.isExisting
+                              ? getImageUrl(file.url)
+                              : URL.createObjectURL(file.originFileObj)
+                          }
+                          width={60}
+                          height={60}
+                          style={{ borderRadius: "5px", objectFit: "cover" }}
+                        />
+                      )}
+                      {/* <Image
                         src={
                           file.isExisting
                             ? getImageUrl(file.url)
@@ -564,8 +571,9 @@ function ProductModal({ isModalOpen, setIsModalOpen, editProduct = null }) {
                         width={60}
                         height={60}
                         style={{ borderRadius: "5px", objectFit: "cover" }}
-                      />
-                      <p>{file.name}</p>
+                      /> */}
+                      {/* <p>{URL.createObjectURL(file.originFileObj)}</p> */}
+                      {/* <p>{file.name}</p> */}
                       <Button
                         onClick={() => handleDelete(file)}
                         icon={<AiOutlineDelete size={30} />}

@@ -12,6 +12,7 @@ import {
   useUpdatePolicyMutation,
 } from "../../../redux/apiSlices/policySlice";
 import { message } from "antd";
+import Loading from "../../../components/common/Loading";
 
 function PrivacyPolicy() {
   const editor = useRef(null);
@@ -135,9 +136,7 @@ function PrivacyPolicy() {
     }
   }, [updatePolicy, content]);
 
-  if (isLoading) {
-    return <p>Loading...</p>;
-  }
+  if (isLoading) return <Loading />;
 
   return (
     <div className="px-3 py-4">

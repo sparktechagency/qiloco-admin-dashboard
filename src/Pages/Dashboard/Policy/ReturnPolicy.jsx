@@ -12,6 +12,7 @@ import {
   usePolicyQuery,
   useUpdatePolicyMutation,
 } from "../../../redux/apiSlices/policySlice";
+import Loading from "../../../components/common/Loading";
 
 function ReturnPolicy() {
   const editor = useRef(null);
@@ -135,9 +136,7 @@ function ReturnPolicy() {
     }
   }, [updateError]);
 
-  if (isLoading) {
-    return <p>Loading...</p>;
-  }
+  if (isLoading) return <Loading />;
 
   return (
     <div className="px-3 py-4">

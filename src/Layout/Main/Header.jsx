@@ -56,7 +56,7 @@ const Header = ({ toggleSidebar }) => {
     };
   }, [refetch]);
 
-  if (isLoading) return <Spinner />;
+  // if (isLoading) return <Spinner />;
 
   return (
     <div className="bg-[#232323] min-h-[80px] flex items-center px-6 transition-all duration-300">

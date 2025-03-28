@@ -13,6 +13,7 @@ import {
 import { getImageUrl } from "../../../components/common/ImageUrl";
 import ProductModal from "./AddProductModal";
 import ProductDetailsModal from "./ProductDetailsModal";
+import Loading from "../../../components/common/Loading";
 
 function ProductList() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -121,6 +122,7 @@ function ProductList() {
     setProductNameToDelete("");
   };
 
+  if (isLoading) return <Loading />;
   return (
     <div className="px-3 py-4">
       <div className="text-white flex justify-between mb-4">
@@ -180,6 +182,7 @@ function ProductList() {
       >
         <div className="custom-table">
           <Table
+            loading={false}
             size="middle"
             dataSource={dataSource}
             columns={columns(
@@ -193,7 +196,6 @@ function ProductList() {
               pageSize: data?.data?.meta?.limit,
               total: data?.data?.meta?.total,
             }}
-            loading={isLoading}
           />
         </div>
 
@@ -281,11 +283,7 @@ const columns = (
     dataIndex: "productScent",
     key: "productScent",
   },
-  // {
-  //   title: "Description",
-  //   dataIndex: "productDescription",
-  //   key: "productDescription",
-  // },
+
   {
     title: "Created At",
     dataIndex: "createdAt",

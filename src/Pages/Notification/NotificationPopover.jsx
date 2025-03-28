@@ -11,6 +11,7 @@ import {
 import EmptyNotification from "../../assets/quiloco/EmptyNotification.png";
 import moment from "moment";
 import { CheckCircleOutlined } from "@ant-design/icons";
+import Loading from "../../components/common/Loading";
 
 function NotificationPopover() {
   const socketRef = useRef(null);
