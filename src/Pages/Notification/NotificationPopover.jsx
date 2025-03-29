@@ -92,7 +92,7 @@ const NotificationPopover = ({ onNotificationRead }) => {
       }}
     >
       <div className="w-72 max-h-96 flex flex-col bg-black">
-        {notificationLoading || updateLoading ? (
+        {notificationLoading ? (
           <div className="p-4 text-center text-white">
             <Spin size="small" />
           </div>
