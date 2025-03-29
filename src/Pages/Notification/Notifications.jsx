@@ -11,7 +11,6 @@ import {
 
 const Notifications = ({ profile }) => {
   const socketRef = useRef(null);
-  // Store notifications from both API and socket
   const [combinedNotifications, setCombinedNotifications] = useState([]);
 
   const {
@@ -20,22 +19,40 @@ const Notifications = ({ profile }) => {
     isLoading: notificationLoading,
   } = useNotificationQuery();
 
+  // Add debug logs to see the actual structure of notifications data
+  console.log("Full notifications response:", notifications);
+  console.log("notifications result:", notifications?.data?.result);
+
   const [readNotification, { isLoading: updateLoading }] = useReadMutation();
   const [readAllNotifications, { isLoading: readAllLoading }] =
     useReadAllMutation();
 
-  // Update combined notifications whenever API data changes
   useEffect(() => {
+    // Check if there's any data in the response
     if (notifications?.data?.result) {
-      setCombinedNotifications(notifications.data.result);
+      const result = notifications.data.result;
+
+      // Check different possible properties where notifications might be stored
+      // It could be in 'read', 'unread', or directly in 'result'
+      if (Array.isArray(result.read)) {
+        setCombinedNotifications(result.read);
+      } else if (Array.isArray(result.unread)) {
+        setCombinedNotifications(result.unread);
+      } else if (Array.isArray(result)) {
+        setCombinedNotifications(result);
+      } else {
+        // If we can't find notifications in the expected places, log the structure
+        console.log("Unexpected notification structure:", result);
+        setCombinedNotifications([]);
+      }
+    } else {
+      setCombinedNotifications([]);
     }
   }, [notifications]);
 
-  // Establish the socket connection and listen for new notifications
   useEffect(() => {
     if (!profile?.data?._id) return;
 
-    // Create new socket connection
     socketRef.current = io("http://10.0.60.126:6007", {
       transports: ["websocket", "polling"],
       reconnection: true,
@@ -43,29 +60,20 @@ const Notifications = ({ profile }) => {
 
     console.log("Socket initialized");
 
-    // Define the event handler function
     function handleNewNotification(notification) {
       console.log("New notification received:", notification);
-
-      // Add the new notification to the top of our list immediately
       setCombinedNotifications((prev) => {
-        // Check if notification already exists to avoid duplicates
         const exists = prev.some((item) => item._id === notification._id);
         if (exists) return prev;
-
-        // Add new notification at the beginning
         return [notification, ...prev];
       });
     }
 
-    // Get the user-specific channel name
     const notificationChannel = `notification::${profile.data._id}`;
 
-    // Register the event listener
     socketRef.current.on(notificationChannel, handleNewNotification);
     console.log(`Listening for notifications on: ${notificationChannel}`);
 
-    // Connection status logging
     socketRef.current.on("connect", () => {
       console.log("Socket connected successfully");
     });
@@ -78,7 +86,6 @@ const Notifications = ({ profile }) => {
       console.error("Socket connection error:", error);
     });
 
-    // Cleanup socket connection on component unmount
     return () => {
       if (socketRef.current) {
         socketRef.current.off(notificationChannel, handleNewNotification);
@@ -91,8 +98,8 @@ const Notifications = ({ profile }) => {
   const formatTime = (timestamp) =>
     timestamp ? moment(timestamp).fromNow() : "Just now";
 
-  if (notificationLoading && combinedNotifications.length === 0)
-    return <Loading />;
+  // Check for loading state before rendering
+  if (notificationLoading) return <Loading />;
 
   return (
     <div className="px-4">
@@ -102,7 +109,7 @@ const Notifications = ({ profile }) => {
           className="bg-gtdandy h-10 px-4 rounded-md"
           onClick={() => {
             readAllNotifications();
-            // Update local state to mark all as read
+
             setCombinedNotifications((prev) =>
               prev.map((notification) => ({ ...notification, read: true }))
             );
@@ -114,7 +121,7 @@ const Notifications = ({ profile }) => {
       </div>
 
       <div className="grid grid-cols-1 gap-5">
-        {combinedNotifications.length > 0 ? (
+        {combinedNotifications && combinedNotifications.length > 0 ? (
           combinedNotifications.map((notification) => (
             <div
               key={notification._id}
@@ -122,7 +129,9 @@ const Notifications = ({ profile }) => {
             >
               <FaRegBell
                 size={50}
-                className="text-quilocoD bg-[#00000033] p-2 rounded-md"
+                className={`text-quilocoD bg-[#00000033] p-2 rounded-md ${
+                  !notification.read ? "animate-bounce" : ""
+                }`}
               />
               <div>
                 <p>{notification.message || "New Notification"}</p>
