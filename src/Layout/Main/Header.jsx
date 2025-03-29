@@ -1,31 +1,41 @@
-import React, { useRef, useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { FaRegBell } from "react-icons/fa6";
 import { Badge, Avatar, Popover } from "antd";
 import { CgMenu } from "react-icons/cg";
 import { useLocation } from "react-router-dom";
-import { imageUrl } from "../../redux/api/baseApi";
 import { useProfileQuery } from "../../redux/apiSlices/profileSlice";
-import NotificationPopover from "../../Pages/Notification/NotificationPopover";
-import io from "socket.io-client";
+import { getImageUrl } from "../../components/common/ImageUrl";
 import { useNotificationQuery } from "../../redux/apiSlices/notificationSlice";
+import io from "socket.io-client";
+import NotificationPopover from "../../Pages/Notification/NotificationPopover";
 
 const Header = ({ toggleSidebar }) => {
-  const socketRef = useRef(null);
   const [open, setOpen] = useState(false);
+  const socketRef = useRef(null);
+  const [unreadCount, setUnreadCount] = useState(0);
 
-  const { data: profile } = useProfileQuery();
+  const { data: profile, isLoading } = useProfileQuery();
   const user = profile?.data;
-  const src = `${imageUrl}${user?.image}`;
+  const src = getImageUrl(user?.image);
 
-  const { data: notifications, refetch } = useNotificationQuery();
+  const {
+    data: notifications,
+    refetch,
+    isLoading: notificationLoading,
+  } = useNotificationQuery();
 
-  const unreadNotification = notifications?.data?.result?.filter(
-    (notification) => !notification.read
-  ).length;
+  // Initialize unread count from API data
+  useEffect(() => {
+    if (notifications?.data?.result) {
+      const count = notifications.data.result.filter(
+        (notification) => !notification.read
+      ).length;
+      setUnreadCount(count);
+    }
+  }, [notifications]);
 
   const location = useLocation();
-
   const getPageName = () => {
     const path = location.pathname;
     if (path === "/") return "Dashboard";
@@ -37,45 +47,70 @@ const Header = ({ toggleSidebar }) => {
       .replace(/\b\w/g, (char) => char.toUpperCase());
   };
 
-  // Use useCallback to prevent unnecessary re-renders
-  const fetchNotifications = useCallback(() => {
-    console.log("Fetching notifications...");
-    refetch();
-  }, [refetch]);
-
+  // Socket connection for real-time notifications
   useEffect(() => {
-    if (!socketRef.current) {
-      socketRef.current = io("YOUR_BACKEND_SOCKET_URL", {
-        transports: ["websocket"],
-        reconnection: true,
-        reconnectionAttempts: 10,
-        reconnectionDelay: 3000,
-      });
+    if (!user?._id) return;
 
-      socketRef.current.on("connect", () => {
-        console.log("Connected to WebSocket server");
-      });
+    // Connect to Socket.IO server
+    socketRef.current = io("http://10.0.60.126:6007", {
+      transports: ["websocket", "polling"],
+      reconnection: true,
+    });
 
-      socketRef.current.on("newNotification", (data) => {
-        console.log("New notification received:", data);
-        fetchNotifications(); // Update notifications in real-time
-      });
+    // Log connection status
+    socketRef.current.on("connect", () => {
+      console.log(
+        "Socket connected in header component:",
+        socketRef.current.id
+      );
+    });
 
-      socketRef.current.on("disconnect", () => {
-        console.log("Disconnected from WebSocket. Attempting to reconnect...");
-      });
-    }
+    socketRef.current.on("connect_error", (error) => {
+      console.error("Socket connection error in header:", error);
+    });
 
+    // Listen for notifications on the user-specific channel
+    const notificationChannel = `notification::${user._id}`;
+
+    // Handle new notification
+    const handleNewNotification = (notification) => {
+      console.log("New notification received in header:", notification);
+
+      // Increment unread count immediately
+      setUnreadCount((prev) => prev + 1);
+
+      // Also refetch to ensure server state is synced
+      refetch();
+    };
+
+    // Register event listener
+    socketRef.current.on(notificationChannel, handleNewNotification);
+    console.log(
+      `Header listening for notifications on: ${notificationChannel}`
+    );
+
+    // Cleanup on unmount
     return () => {
       if (socketRef.current) {
+        socketRef.current.off(notificationChannel, handleNewNotification);
         socketRef.current.disconnect();
-        socketRef.current = null;
       }
     };
-  }, [fetchNotifications]);
+  }, [user?._id, refetch]);
+
+  // Handler for when notification is read in the popover
+  const handleNotificationRead = () => {
+    // Update the unread count when notifications are read
+    const updatedCount =
+      notifications?.data?.result?.filter((notification) => !notification.read)
+        .length || 0;
+
+    setUnreadCount(updatedCount);
+  };
 
   return (
     <div className="bg-[#232323] min-h-[80px] flex items-center px-6 transition-all duration-300">
+      {/* Sidebar Toggle Button */}
       <CgMenu
         size={40}
         onClick={toggleSidebar}
@@ -85,19 +120,28 @@ const Header = ({ toggleSidebar }) => {
       <h1 className="text-2xl text-white ml-4">{getPageName()}</h1>
 
       <div className="flex items-center gap-6 ml-auto">
+        {/* Notifications */}
         <Popover
-          content={<NotificationPopover />}
+          content={
+            <NotificationPopover onNotificationRead={handleNotificationRead} />
+          }
           title={null}
           trigger="click"
           arrow={false}
           open={open}
-          onOpenChange={setOpen}
+          onOpenChange={(visible) => {
+            setOpen(visible);
+            if (visible) {
+              // Refetch notifications when popover opens
+              refetch();
+            }
+          }}
           placement="bottom"
         >
           <div className="relative border rounded-full p-2 cursor-pointer">
             <FaRegBell size={24} color="white" />
             <Badge
-              count={unreadNotification}
+              count={unreadCount}
               overflowCount={5}
               size="small"
               className="absolute top-1 -right-0"
@@ -105,6 +149,7 @@ const Header = ({ toggleSidebar }) => {
           </div>
         </Popover>
 
+        {/* User Profile */}
         <Link to="/my-profile" className="flex items-center gap-2 text-white">
           <div className="border rounded-full">
             <Avatar size={40} src={src} />

@@ -1,24 +1,18 @@
-import { Button, ConfigProvider, Spin, Tag } from "antd";
-import React, { useEffect, useRef, useState } from "react";
-import { MdCancel, MdOutlineMarkEmailRead } from "react-icons/md";
-import { Link, useNavigate } from "react-router-dom";
-import io from "socket.io-client";
-import { useProfileQuery } from "../../redux/apiSlices/profileSlice";
+import React from "react";
+import { Link } from "react-router-dom";
+import { Spin, Tag, Button, ConfigProvider } from "antd";
+import { CheckCircleOutlined } from "@ant-design/icons";
+import { MdOutlineMarkEmailRead, MdCancel } from "react-icons/md";
+import moment from "moment";
+
+import EmptyNotification from "../../assets/quiloco/EmptyNotification.png";
 import {
   useNotificationQuery,
+  useReadAllMutation,
   useReadMutation,
 } from "../../redux/apiSlices/notificationSlice";
-import EmptyNotification from "../../assets/quiloco/EmptyNotification.png";
-import moment from "moment";
-import { CheckCircleOutlined } from "@ant-design/icons";
 
-function NotificationPopover() {
-  const socketRef = useRef(null);
-  const [showAll, setShowAll] = useState(false);
-  const [notificationList, setNotificationList] = useState([]);
-  const navigate = useNavigate();
-
-  const { data: profile } = useProfileQuery();
+const NotificationPopover = ({ onNotificationRead }) => {
   const {
     data: notifications,
     refetch,
@@ -26,81 +20,113 @@ function NotificationPopover() {
   } = useNotificationQuery();
 
   const [readNotification, { isLoading: updateLoading }] = useReadMutation();
+  const [readAllNotifications, { isLoading: readAllLoading }] =
+    useReadAllMutation();
 
-  useEffect(() => {
-    socketRef.current = io("http://10.0.60.126:6007");
+  const displayedNotifications = notifications?.data?.result || [];
 
-    const handleNewNotification = (notification) => {
-      console.log("New Notification Received:", notification);
-      setNotificationList((prev) => [notification, ...prev].slice(0, 5)); // Keep latest 5
-    };
+  const formatTime = (timestamp) =>
+    timestamp ? moment(timestamp).fromNow() : "Just now";
 
-    if (profile?.data?._id) {
-      socketRef.current.on(
-        `notification::${profile.data._id}`,
-        handleNewNotification
-      );
+  const getTypeColor = (type) => {
+    switch (type) {
+      case "ORDER":
+        return "blue";
+      default:
+        return "green";
     }
+  };
 
-    return () => {
-      if (socketRef.current) {
-        socketRef.current.off(
-          `notification::${profile?.data?._id}`,
-          handleNewNotification
-        );
-        socketRef.current.disconnect();
-      }
-    };
-  }, [profile?.data?._id]);
-
-  useEffect(() => {
-    if (notifications?.data?.result) {
-      setNotificationList(notifications.data.result.slice(0, 5)); // Load latest 5 initially
+  const handleNotificationClick = (notification) => {
+    if (!notification.read) {
+      markAsRead(notification._id);
     }
-  }, [notifications]);
+    // Add navigation or other actions here if needed
+  };
 
   const markAsRead = async (id) => {
     try {
       await readNotification(id);
-      setNotificationList((prev) =>
-        prev.map((notif) =>
-          notif._id === id ? { ...notif, read: true } : notif
-        )
-      );
+      // Refresh the notifications list to show updated UI
+      await refetch();
+      if (onNotificationRead) {
+        onNotificationRead();
+      }
     } catch (error) {
       console.error("Error marking notification as read:", error);
     }
   };
 
-  const removeMessage = async (id) => {
-    // Implement delete/archive logic
-    setNotificationList((prev) => prev.filter((notif) => notif._id !== id));
+  const removeMessage = (id) => {
+    // Implement delete functionality if needed
+    console.log("Delete notification:", id);
   };
 
-  const formatTime = (timestamp) => moment(timestamp).fromNow();
-
-  const displayedNotifications = showAll
-    ? notificationList.slice(0, 5)
-    : notificationList.slice(0, 3);
+  const handleReadAll = async () => {
+    try {
+      await readAllNotifications();
+      await refetch();
+      if (onNotificationRead) {
+        onNotificationRead();
+      }
+    } catch (error) {
+      console.error("Error marking all notifications as read:", error);
+    }
+  };
 
   return (
-    <ConfigProvider>
+    <ConfigProvider
+      theme={{
+        components: {
+          Button: {
+            defaultBg: "#a11d26",
+            defaultColor: "#ffffff",
+            defaultHoverBg: "#a11d26",
+            defaultHoverColor: "#ffffff",
+            defaultHoverBorderColor: "#a11d26",
+            defaultActiveBg: "#a11d26",
+            defaultActiveColor: "#ffffff",
+            defaultActiveBorderColor: "none",
+          },
+        },
+      }}
+    >
       <div className="w-72 max-h-96 flex flex-col bg-black">
         {notificationLoading || updateLoading ? (
           <div className="p-4 text-center text-white">
             <Spin size="small" />
           </div>
-        ) : displayedNotifications.length > 0 ? (
+        ) : displayedNotifications?.length > 0 ? (
           <>
             <div className="flex justify-between items-center px-4 py-2 border-b border-gray-700">
               <h3 className="text-white font-medium">Notifications</h3>
+              {displayedNotifications.some((item) => !item.read) && (
+                <Button
+                  size="small"
+                  onClick={handleReadAll}
+                  loading={readAllLoading}
+                  className="text-xs"
+                >
+                  Mark all as read
+                </Button>
+              )}
             </div>
-            <div className="overflow-y-auto px-2 py-1">
+            <div
+              className="overflow-y-auto px-2 py-1
+              [&::-webkit-scrollbar]:w-1
+                    [&::-webkit-scrollbar-track]:rounded-full
+                    [&::-webkit-scrollbar-track]:bg-gray-100
+                    [&::-webkit-scrollbar-thumb]:rounded-full
+                    [&::-webkit-scrollbar-thumb]:bg-gray-300
+                    dark:[&::-webkit-scrollbar-track]:bg-neutral-700
+                    dark:[&::-webkit-scrollbar-thumb]:bg-neutral-500"
+            >
               {displayedNotifications.map((item) => (
                 <div
                   key={item._id}
+                  onClick={() => handleNotificationClick(item)}
                   className={`w-full min-h-16 flex items-start justify-between gap-3 p-3 my-1 rounded-md cursor-pointer hover:bg-gray-800 ${
-                    !item.read ? "bg-gray-900" : ""
+                    !item.read ? "border border-quilocoD" : ""
                   }`}
                 >
                   <div className="flex items-start gap-3 flex-1">
@@ -109,7 +135,9 @@ function NotificationPopover() {
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center justify-between mb-1">
-                        {item.type && <Tag color="blue">{item.type}</Tag>}
+                        {item.type && (
+                          <Tag color={getTypeColor(item.type)}>{item.type}</Tag>
+                        )}
                         <span className="text-xs text-gray-500">
                           {formatTime(item.createdAt)}
                         </span>
@@ -133,6 +161,7 @@ function NotificationPopover() {
                       }}
                       className="text-gray-400 hover:text-white"
                       title="Mark as read"
+                      disabled={item.read}
                     >
                       <MdOutlineMarkEmailRead size={16} />
                     </button>
@@ -151,14 +180,6 @@ function NotificationPopover() {
               ))}
             </div>
             <div className="border-t border-gray-700 p-2 flex justify-between items-center">
-              {notificationList.length > 3 && (
-                <button
-                  onClick={() => setShowAll(!showAll)}
-                  className="text-slate-400 hover:text-white text-sm"
-                >
-                  {showAll ? "Show less" : "Show more..."}
-                </button>
-              )}
               <Link to="/notification">
                 <Button className="rounded-lg">See all</Button>
               </Link>
@@ -186,6 +207,6 @@ function NotificationPopover() {
       </div>
     </ConfigProvider>
   );
-}
+};
 
 export default NotificationPopover;

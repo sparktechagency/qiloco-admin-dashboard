@@ -1,18 +1,18 @@
-import React, { useState, useEffect, useRef } from "react";
-import io from "socket.io-client";
-import toast from "react-hot-toast";
+import React, { useEffect, useRef, useState } from "react";
 import { FaRegBell } from "react-icons/fa";
+import io from "socket.io-client";
 import moment from "moment";
+import Loading from "../../components/common/Loading";
 import {
   useNotificationQuery,
   useReadAllMutation,
   useReadMutation,
 } from "../../redux/apiSlices/notificationSlice";
-import Loading from "../../components/common/Loading";
 
 const Notifications = ({ profile }) => {
   const socketRef = useRef(null);
-  const [notificationList, setNotificationList] = useState([]);
+  // Store notifications from both API and socket
+  const [combinedNotifications, setCombinedNotifications] = useState([]);
 
   const {
     data: notifications,
@@ -24,104 +24,100 @@ const Notifications = ({ profile }) => {
   const [readAllNotifications, { isLoading: readAllLoading }] =
     useReadAllMutation();
 
+  // Update combined notifications whenever API data changes
+  useEffect(() => {
+    if (notifications?.data?.result) {
+      setCombinedNotifications(notifications.data.result);
+    }
+  }, [notifications]);
+
+  // Establish the socket connection and listen for new notifications
   useEffect(() => {
     if (!profile?.data?._id) return;
 
+    // Create new socket connection
     socketRef.current = io("http://10.0.60.126:6007", {
+      transports: ["websocket", "polling"],
       reconnection: true,
-      reconnectionAttempts: 5,
-      reconnectionDelay: 2000,
     });
 
+    console.log("Socket initialized");
+
+    // Define the event handler function
+    function handleNewNotification(notification) {
+      console.log("New notification received:", notification);
+
+      // Add the new notification to the top of our list immediately
+      setCombinedNotifications((prev) => {
+        // Check if notification already exists to avoid duplicates
+        const exists = prev.some((item) => item._id === notification._id);
+        if (exists) return prev;
+
+        // Add new notification at the beginning
+        return [notification, ...prev];
+      });
+    }
+
+    // Get the user-specific channel name
+    const notificationChannel = `notification::${profile.data._id}`;
+
+    // Register the event listener
+    socketRef.current.on(notificationChannel, handleNewNotification);
+    console.log(`Listening for notifications on: ${notificationChannel}`);
+
+    // Connection status logging
     socketRef.current.on("connect", () => {
-      console.log("Connected to WebSocket server");
+      console.log("Socket connected successfully");
     });
 
-    socketRef.current.on("connect_error", (err) => {
-      console.error("Socket connection error:", err);
+    socketRef.current.on("disconnect", (reason) => {
+      console.log("Socket disconnected:", reason);
     });
 
-    const handleNewNotification = (data) => {
-      console.log("New notification received:", data);
-      setNotificationList((prev) => [data, ...prev]); // Add new notifications at the top
-    };
+    socketRef.current.on("connect_error", (error) => {
+      console.error("Socket connection error:", error);
+    });
 
-    const eventChannel = `notification::${profile.data._id}`;
-    console.log(`Listening to ${eventChannel}`);
-
-    socketRef.current.on(eventChannel, handleNewNotification);
-
+    // Cleanup socket connection on component unmount
     return () => {
       if (socketRef.current) {
-        console.log(`Unsubscribing from ${eventChannel}`);
-        socketRef.current.off(eventChannel, handleNewNotification);
-        socketRef.current.close();
+        socketRef.current.off(notificationChannel, handleNewNotification);
+        socketRef.current.disconnect();
         socketRef.current = null;
       }
     };
   }, [profile?.data?._id]);
 
-  useEffect(() => {
-    if (notifications?.data?.result) {
-      setNotificationList(notifications.data.result); // Load all notifications at once
-    }
-  }, [notifications]);
-
-  const markAsRead = async (id) => {
-    try {
-      await readNotification(id);
-      setNotificationList((prev) =>
-        prev.map((notif) =>
-          notif._id === id ? { ...notif, read: true } : notif
-        )
-      );
-      toast.success("Notification marked as read!");
-    } catch (error) {
-      console.error("Error marking notification as read:", error);
-      toast.error("Failed to mark as read.");
-    }
-  };
-
-  const markAllAsRead = async () => {
-    try {
-      await readAllNotifications();
-      setNotificationList((prev) =>
-        prev.map((notif) => ({ ...notif, read: true }))
-      );
-      toast.success("All notifications marked as read!");
-    } catch (error) {
-      console.error("Error marking all notifications as read:", error);
-      toast.error("Failed to mark all as read.");
-    }
-  };
-
   const formatTime = (timestamp) =>
     timestamp ? moment(timestamp).fromNow() : "Just now";
 
-  const unreadCount = notificationList.filter((notif) => !notif.read).length;
+  if (notificationLoading && combinedNotifications.length === 0)
+    return <Loading />;
 
-  return notificationLoading ? (
-    <Loading />
-  ) : (
+  return (
     <div className="px-4">
-      {/* Header Section */}
       <div className="flex items-center justify-between mb-3 text-white">
         <h2 className="text-[22px]">All Notifications</h2>
         <button
           className="bg-gtdandy h-10 px-4 rounded-md"
-          onClick={markAllAsRead}
-          disabled={readAllLoading || unreadCount === 0}
+          onClick={() => {
+            readAllNotifications();
+            // Update local state to mark all as read
+            setCombinedNotifications((prev) =>
+              prev.map((notification) => ({ ...notification, read: true }))
+            );
+          }}
+          disabled={readAllLoading}
         >
-          {readAllLoading ? "Loading..." : "Read All"}
+          {readAllLoading ? "Loading..." : "Mark All as Read"}
         </button>
       </div>
 
-      {/* Notifications List */}
       <div className="grid grid-cols-1 gap-5">
-        {notificationList.length > 0 ? (
-          notificationList.map((notification, index) => (
+        {combinedNotifications.length > 0 ? (
+          combinedNotifications.map((notification) => (
             <div
-              key={notification._id || index}
+              key={notification._id}
               className="border-b pb-2 border-gray-500 flex items-center gap-3"
             >
               <FaRegBell
@@ -137,10 +133,20 @@ const Notifications = ({ profile }) => {
               {!notification.read && (
                 <button
                   className="text-blue-500 text-sm ml-auto"
-                  onClick={() => markAsRead(notification._id)}
+                  onClick={() => {
+                    readNotification(notification._id);
+                    // Update the local state immediately
+                    setCombinedNotifications((prev) =>
+                      prev.map((item) =>
+                        item._id === notification._id
+                          ? { ...item, read: true }
+                          : item
+                      )
+                    );
+                  }}
                   disabled={updateLoading}
                 >
-                  {updateLoading ? "Processing..." : "Mark as Read"}
+                  Mark as Read
                 </button>
               )}
             </div>
