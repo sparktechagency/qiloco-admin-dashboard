@@ -16,7 +16,7 @@ const orderSlice = api.injectEndpoints({
       query: (page) => {
         return {
           method: "GET",
-          url: `/api/v1/orders?page={page}`,
+          url: `/api/v1/orders?page=${page}`,
         };
       },
       providesTags: ["Orders"],

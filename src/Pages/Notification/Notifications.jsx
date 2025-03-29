@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from "react";
-import { ConfigProvider, Pagination } from "antd";
 import io from "socket.io-client";
 import toast from "react-hot-toast";
 import { FaRegBell } from "react-icons/fa";
@@ -12,8 +11,8 @@ import {
 import Loading from "../../components/common/Loading";
 
 const Notifications = ({ profile }) => {
-  const [page, setPage] = useState(1);
   const socketRef = useRef(null);
+  const [notificationList, setNotificationList] = useState([]);
 
   const {
     data: notifications,
@@ -28,14 +27,12 @@ const Notifications = ({ profile }) => {
   useEffect(() => {
     if (!profile?.data?._id) return;
 
-    // Connect to WebSocket server with automatic reconnection
     socketRef.current = io("http://10.0.60.126:6007", {
       reconnection: true,
       reconnectionAttempts: 5,
       reconnectionDelay: 2000,
     });
 
-    // Log connection status
     socketRef.current.on("connect", () => {
       console.log("Connected to WebSocket server");
     });
@@ -44,10 +41,9 @@ const Notifications = ({ profile }) => {
       console.error("Socket connection error:", err);
     });
 
-    // Listen for real-time notifications
     const handleNewNotification = (data) => {
       console.log("New notification received:", data);
-      refetch();
+      setNotificationList((prev) => [data, ...prev]); // Add new notifications at the top
     };
 
     const eventChannel = `notification::${profile.data._id}`;
@@ -59,16 +55,26 @@ const Notifications = ({ profile }) => {
       if (socketRef.current) {
         console.log(`Unsubscribing from ${eventChannel}`);
         socketRef.current.off(eventChannel, handleNewNotification);
-        socketRef.current.close(); // Close connection properly
+        socketRef.current.close();
         socketRef.current = null;
       }
     };
-  }, [refetch, profile?.data?._id]);
+  }, [profile?.data?._id]);
+
+  useEffect(() => {
+    if (notifications?.data?.result) {
+      setNotificationList(notifications.data.result); // Load all notifications at once
+    }
+  }, [notifications]);
 
   const markAsRead = async (id) => {
     try {
       await readNotification(id);
-      refetch();
+      setNotificationList((prev) =>
+        prev.map((notif) =>
+          notif._id === id ? { ...notif, read: true } : notif
+        )
+      );
       toast.success("Notification marked as read!");
     } catch (error) {
       console.error("Error marking notification as read:", error);
@@ -79,7 +85,9 @@ const Notifications = ({ profile }) => {
   const markAllAsRead = async () => {
     try {
       await readAllNotifications();
-      refetch();
+      setNotificationList((prev) =>
+        prev.map((notif) => ({ ...notif, read: true }))
+      );
       toast.success("All notifications marked as read!");
     } catch (error) {
       console.error("Error marking all notifications as read:", error);
@@ -90,12 +98,7 @@ const Notifications = ({ profile }) => {
   const formatTime = (timestamp) =>
     timestamp ? moment(timestamp).fromNow() : "Just now";
 
-  const unreadCount =
-    notifications?.data?.result?.filter((notif) => !notif.read).length || 0;
-  const totalNotifications = notifications?.data?.total || 0;
-
-  const displayedNotifications =
-    notifications?.data?.result?.slice((page - 1) * 5, page * 5) || [];
+  const unreadCount = notificationList.filter((notif) => !notif.read).length;
 
   return notificationLoading ? (
     <Loading />
@@ -115,8 +118,8 @@ const Notifications = ({ profile }) => {
 
       {/* Notifications List */}
       <div className="grid grid-cols-1 gap-5">
-        {displayedNotifications.length > 0 ? (
-          displayedNotifications.map((notification, index) => (
+        {notificationList.length > 0 ? (
+          notificationList.map((notification, index) => (
             <div
               key={notification._id || index}
               className="border-b pb-2 border-gray-500 flex items-center gap-3"
@@ -145,32 +148,6 @@ const Notifications = ({ profile }) => {
         ) : (
           <p className="text-gray-400">No notifications available.</p>
         )}
-      </div>
-
-      {/* Pagination */}
-      <div className="flex items-center justify-center mt-6">
-        <ConfigProvider
-          theme={{
-            components: {
-              Pagination: {
-                itemActiveBg: "#FFC301",
-                itemBg: "black",
-                borderRadius: "50px",
-                colorText: "white",
-              },
-            },
-            token: { colorPrimary: "white" },
-          }}
-        >
-          <Pagination
-            current={page}
-            total={totalNotifications}
-            onChange={(page) => setPage(page)}
-            pageSize={5}
-            showQuickJumper={false}
-            showSizeChanger={false}
-          />
-        </ConfigProvider>
       </div>
     </div>
   );

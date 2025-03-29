@@ -164,8 +164,8 @@ const EarningsTable = ({
             pagination={{
               current: page,
               onChange: (page) => setPage(page),
-              pageSize: earnings?.data?.meta?.limit || 10,
-              total: earnings?.data?.meta?.total || 0,
+              pageSize: earnings?.data?.pagination?.limit || 10,
+              total: earnings?.data?.pagination?.total || 0,
             }}
           />
         </div>

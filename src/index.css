@@ -238,17 +238,10 @@ textarea::placeholder {
   border-radius: 5px;
 }
 
-/* .ant-pagination .ant-pagination-item a {
-  color: white !important;
-  border: none !important;
-} */
-
 .ant-pagination .ant-pagination-item a:hover {
   background-color: #a11d26 !important;
   color: white !important;
-
   border-radius: 5px !important;
-  /* transform: scale(1); */
 }
 .ant-pagination .ant-pagination-item-active {
   scale: 1.1;
@@ -390,4 +383,13 @@ input[type="number"] {
   box-shadow: 0 6px 16px 0 rgba(0, 0, 0, 0.08),
     0 3px 6px -4px rgba(0, 0, 0, 0.12), 0 9px 28px 8px rgba(0, 0, 0, 0.05);
   padding: 2px;
+}
+
+.ant-menu-light.ant-menu-submenu-popup > .ant-menu {
+  background-color: #6c6c6c;
+}
+
+.ant-menu-light.ant-menu-submenu-popup > .ant-menu > li {
+  display: flex;
+  align-items: center;
 }

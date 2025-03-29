@@ -81,15 +81,15 @@ export default function MonthlySale() {
               </div>
             }
             style={{
-              backgroundColor: "#575958", // Background black
-              color: "white", // Input text white
+              backgroundColor: "#575958",
+              color: "white",
             }}
           />
         </div>
 
         <ResponsiveContainer width="100%" height={300}>
           <BarChart
-            data={chartData} // ✅ Corrected to use API data
+            data={chartData}
             margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
           >
             <CartesianGrid

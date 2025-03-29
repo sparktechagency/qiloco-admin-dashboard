@@ -3,7 +3,6 @@ import { Table, Avatar, ConfigProvider, Input, message } from "antd";
 import { FiPlusCircle, FiEdit } from "react-icons/fi";
 import { IoEye, IoTrash } from "react-icons/io5";
 import { SearchOutlined } from "@ant-design/icons";
-
 import ProductDeleteModal from "./ProductDeleteModal";
 import {
   useDeleteProductMutation,

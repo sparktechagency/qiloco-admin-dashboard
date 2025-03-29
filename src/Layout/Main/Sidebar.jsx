@@ -1,11 +1,11 @@
 import { Menu } from "antd";
 import React, { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-
-import { TbBellBolt, TbDashboard, TbListDetails } from "react-icons/tb";
+import { FaRegListAlt } from "react-icons/fa";
+import { TbListDetails } from "react-icons/tb";
+import { FaHandHoldingDollar } from "react-icons/fa6";
 import { RxDashboard } from "react-icons/rx";
-import { PiWallet } from "react-icons/pi";
-import { FiLogOut, FiUsers } from "react-icons/fi";
+import { FiLogOut } from "react-icons/fi";
 import { RiMoneyDollarCircleLine, RiSettings5Line } from "react-icons/ri";
 import qilocoLogo from "../../assets/quiloco/qilocoLogo.png";
 import { LuBoxes } from "react-icons/lu";
@@ -68,6 +68,7 @@ const Sidebar = ({ isCollapsed }) => {
         ? [
             {
               key: "/returnPolicy",
+              icon: <FaHandHoldingDollar size={24} />,
               label: (
                 <Link to="/returnPolicy" className="text-white">
                   Return Policy
@@ -76,6 +77,7 @@ const Sidebar = ({ isCollapsed }) => {
             },
             {
               key: "/privacyPolicy",
+              icon: <FaRegListAlt size={24} />,
               label: (
                 <Link to="/privacyPolicy" className="text-white">
                   Privacy Policy
@@ -86,6 +88,7 @@ const Sidebar = ({ isCollapsed }) => {
         : [
             {
               key: "/returnPolicy",
+              icon: <FaHandHoldingDollar size={24} />,
               label: (
                 <Link to="/returnPolicy" className="text-white">
                   Return Policy
@@ -94,6 +97,7 @@ const Sidebar = ({ isCollapsed }) => {
             },
             {
               key: "/privacyPolicy",
+              icon: <FaRegListAlt size={24} />,
               label: (
                 <Link to="/privacyPolicy" className="text-white">
                   Privacy Policy

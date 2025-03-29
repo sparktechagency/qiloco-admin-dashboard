@@ -1,8 +1,7 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { FaRegBell } from "react-icons/fa6";
 import { Badge, Avatar, Popover } from "antd";
-import Spinner from "../../components/common/Spinner";
 import { CgMenu } from "react-icons/cg";
 import { useLocation } from "react-router-dom";
 import { imageUrl } from "../../redux/api/baseApi";
@@ -14,15 +13,12 @@ import { useNotificationQuery } from "../../redux/apiSlices/notificationSlice";
 const Header = ({ toggleSidebar }) => {
   const socketRef = useRef(null);
   const [open, setOpen] = useState(false);
-  const { data: profile, isLoading } = useProfileQuery();
+
+  const { data: profile } = useProfileQuery();
   const user = profile?.data;
   const src = `${imageUrl}${user?.image}`;
 
-  const {
-    data: notifications,
-    refetch,
-    isLoading: notificationLoading,
-  } = useNotificationQuery();
+  const { data: notifications, refetch } = useNotificationQuery();
 
   const unreadNotification = notifications?.data?.result?.filter(
     (notification) => !notification.read
@@ -35,28 +31,48 @@ const Header = ({ toggleSidebar }) => {
     if (path === "/") return "Dashboard";
 
     const pageName = path.substring(1).split("/").pop();
-
     return pageName
       .replace(/([a-z])([A-Z])/g, "$1 $2")
       .replace(/-/g, " ")
       .replace(/\b\w/g, (char) => char.toUpperCase());
   };
 
-  useEffect(() => {
-    socketRef.current = io("YOUR_BACKEND_SOCKET_URL", {
-      transports: ["websocket"],
-    });
-
-    socketRef.current.on("newNotification", () => {
-      refetch(); // Fetch new notifications when a new one arrives
-    });
-
-    return () => {
-      socketRef.current.disconnect(); // Cleanup on unmount
-    };
+  // Use useCallback to prevent unnecessary re-renders
+  const fetchNotifications = useCallback(() => {
+    console.log("Fetching notifications...");
+    refetch();
   }, [refetch]);
 
-  // if (isLoading) return <Spinner />;
+  useEffect(() => {
+    if (!socketRef.current) {
+      socketRef.current = io("YOUR_BACKEND_SOCKET_URL", {
+        transports: ["websocket"],
+        reconnection: true,
+        reconnectionAttempts: 10,
+        reconnectionDelay: 3000,
+      });
+
+      socketRef.current.on("connect", () => {
+        console.log("Connected to WebSocket server");
+      });
+
+      socketRef.current.on("newNotification", (data) => {
+        console.log("New notification received:", data);
+        fetchNotifications(); // Update notifications in real-time
+      });
+
+      socketRef.current.on("disconnect", () => {
+        console.log("Disconnected from WebSocket. Attempting to reconnect...");
+      });
+    }
+
+    return () => {
+      if (socketRef.current) {
+        socketRef.current.disconnect();
+        socketRef.current = null;
+      }
+    };
+  }, [fetchNotifications]);
 
   return (
     <div className="bg-[#232323] min-h-[80px] flex items-center px-6 transition-all duration-300">

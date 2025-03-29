@@ -8,7 +8,7 @@ import {
   Menu,
   Dropdown,
   Button,
-  message, // Import message component
+  message,
 } from "antd";
 import { DownOutlined } from "@ant-design/icons";
 import OrderDetailsModal from "./OrderDetailsModal";
@@ -29,6 +29,7 @@ function OrderDetails() {
   const [updateOrderStatus, { isLoading: isUpdating }] =
     useUpdateOrderStatusMutation();
 
+  console.log("Order Details", orderList);
   // Transform API response to table-friendly format
   useEffect(() => {
     if (orderList?.data?.orders) {
@@ -238,8 +239,8 @@ function OrderDetails() {
                 size="middle"
                 pagination={{
                   onChange: (page) => setPage(page),
-                  pageSize: orderList?.data?.meta?.limit,
-                  total: orderList?.data?.meta?.total,
+                  pageSize: orderList?.data?.pagination?.limit,
+                  total: orderList?.data?.pagination?.total,
                 }}
               />
             </div>
