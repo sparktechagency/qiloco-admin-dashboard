@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { FaRegListAlt } from "react-icons/fa";
 import { TbListDetails } from "react-icons/tb";
-import { FaHandHoldingDollar } from "react-icons/fa6";
+import { FaClipboardQuestion, FaHandHoldingDollar } from "react-icons/fa6";
 import { RxDashboard } from "react-icons/rx";
 import { FiLogOut } from "react-icons/fi";
 import { RiMoneyDollarCircleLine, RiSettings5Line } from "react-icons/ri";
@@ -59,6 +59,15 @@ const Sidebar = ({ isCollapsed }) => {
         <Link to="/earnings">Earnings</Link>
       ) : (
         <Link to="/earnings">Earnings</Link>
+      ),
+    },
+    {
+      key: "/inquiry",
+      icon: <FaClipboardQuestion size={25} />,
+      label: isCollapsed ? (
+        <Link to="/inquiry">Inquiry</Link>
+      ) : (
+        <Link to="/inquiry">Inquiry</Link>
       ),
     },
     {

@@ -25,6 +25,7 @@ import RecentSellingProduct from "../Pages/Dashboard/RecentSellingProduct/Recent
 import Setting from "../Pages/Dashboard/Profile/Setting.jsx";
 import Notifications from "../Pages/Notification/Notifications.jsx";
 import ProtectedRoute from "./ProtectedRoute.jsx";
+import Inquiry from "../Pages/Dashboard/Inquiry/Inquiry.jsx";
 
 const router = createBrowserRouter([
   {
@@ -66,6 +67,10 @@ const router = createBrowserRouter([
       {
         path: "/privacyPolicy",
         element: <PrivacyPolicy />,
+      },
+      {
+        path: "/inquiry",
+        element: <Inquiry />,
       },
 
       // {
