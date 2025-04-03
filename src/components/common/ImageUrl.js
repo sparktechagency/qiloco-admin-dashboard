@@ -7,6 +7,8 @@
 //   }
 // };
 
+import { getBaseUrl } from "../../utils/baseUrl";
+
 export const getImageUrl = (path) => {
   // Check if path is undefined, null, or empty
   if (!path) {
@@ -17,7 +19,8 @@ export const getImageUrl = (path) => {
   if (path.startsWith("http://") || path.startsWith("https://")) {
     return path;
   } else {
-    const baseUrl = "http://10.0.60.126:6007";
+    const baseUrl = getBaseUrl();
+    // const baseUrl = "http://10.0.60.126:6007";
     return `${baseUrl}/${path}`;
   }
 };
