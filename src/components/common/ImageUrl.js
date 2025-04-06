@@ -20,7 +20,8 @@ export const getImageUrl = (path) => {
     return path;
   } else {
     const baseUrl = getBaseUrl();
+    // console.log(baseUrl, path);
     // const baseUrl = "http://10.0.60.126:6007";
-    return `${baseUrl}/${path}`;
+    return `${baseUrl}${path}`;
   }
 };
