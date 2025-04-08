@@ -9,21 +9,20 @@ const Login = () => {
   const navigate = useNavigate();
   const [login, { isLoading }] = useLoginMutation();
 
-  // Retrieve saved email and password from localStorage
+  // Retrieve saved email from localStorage
   const savedEmail = localStorage.getItem("savedEmail");
-  const savedPassword = localStorage.getItem("savedPassword");
 
   const [form] = Form.useForm();
 
-  // On component mount, set form fields if there are saved credentials
+  // On component mount, set form fields if there is a saved email
   useEffect(() => {
-    if (savedEmail && savedPassword) {
+    if (savedEmail) {
       form.setFieldsValue({
         email: savedEmail,
-        password: savedPassword,
+        remember: true, // Check the remember checkbox when email is pre-filled
       });
     }
-  }, [savedEmail, savedPassword, form]);
+  }, [savedEmail, form]);
 
   const onFinish = async (values) => {
     console.log(values);
@@ -37,14 +36,12 @@ const Login = () => {
       localStorage.setItem("token", response?.data?.token);
       localStorage.setItem("Super", response?.data?.user?.role);
 
-      // If "Remember me" is checked, save email and password in localStorage
+      // If "Remember me" is checked, save email in localStorage
       if (values.remember) {
         localStorage.setItem("savedEmail", values.email);
-        localStorage.setItem("savedPassword", values.password);
       } else {
-        // Remove saved credentials from localStorage if "Remember me" is not checked
+        // Remove saved email if "Remember me" is not checked
         localStorage.removeItem("savedEmail");
-        localStorage.removeItem("savedPassword");
       }
 
       // Navigate based on user role
@@ -130,13 +127,13 @@ const Login = () => {
           </Form.Item>
 
           <div className="flex items-center justify-between">
-            <Form.Item
+            {/* <Form.Item
               style={{ marginBottom: 0 }}
               name="remember"
               valuePropName="checked"
             >
               <Checkbox className="text-[#A3A3A3]">Remember me</Checkbox>
-            </Form.Item>
+            </Form.Item> */}
 
             <a
               className="login-form-forgot text-white hover:text-[#A3A3A3] font-semibold"
