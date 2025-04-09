@@ -34,7 +34,7 @@ function TransactionDetailsModal({ isModalOpen, setIsModalOpen, transaction }) {
             <div className="flex flex-col items-center justify-center w-full h-24 gap-2">
               <div className="w-[80%] flex items-center justify-between">
                 <p>Transaction ID:</p>
-                <p>{transaction.trnxid || "N/A"}</p>
+                <p>{transaction.paymentIntentId || "N/A"}</p>
               </div>
               <div className="w-[80%] flex items-center justify-between">
                 <p>Date:</p>
@@ -50,7 +50,7 @@ function TransactionDetailsModal({ isModalOpen, setIsModalOpen, transaction }) {
               </div>
               <div className="w-[80%] flex items-center justify-between">
                 <p>Status:</p>
-                <p>{transaction.status || "N/A"}</p>
+                <p>{transaction.paymentStatus || "N/A"}</p>
               </div>
             </div>
           ) : (

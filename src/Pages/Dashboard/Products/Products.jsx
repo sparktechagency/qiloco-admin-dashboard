@@ -192,8 +192,12 @@ function ProductList() {
             )}
             pagination={{
               onChange: (page) => setPage(page),
+              showSizeChanger: false, // 🔥 Hide page size dropdown
               pageSize: data?.data?.meta?.limit,
               total: data?.data?.meta?.total,
+              showTotal: (total, range) => (
+                <span className="text-white">{`Total ${total} items`}</span>
+              ),
             }}
           />
         </div>

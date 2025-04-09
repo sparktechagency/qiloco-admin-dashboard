@@ -39,6 +39,7 @@ function ProductDetailsModal({ isModalOpen, setIsModalOpen, record }) {
     >
       <Modal
         open={isModalOpen}
+        centered
         width={900}
         onCancel={handleCancel}
         footer={null}
@@ -63,100 +64,62 @@ function ProductDetailsModal({ isModalOpen, setIsModalOpen, record }) {
             className="product-details-table bg-slate-300 rounded-md "
             labelStyle={{ fontWeight: "bold" }}
           >
-            {/* <Descriptions.Item
-              label="ID"
-              style={{ color: "#555d64", fontWeight: "bold" }}
-            >
-              {record?._id}
-            </Descriptions.Item> */}
-            {/* <Descriptions.Item
-              label="User ID"
-              style={{ color: "#555d64", fontWeight: "bold" }}
-            >
-              {record?.userId}
-            </Descriptions.Item> */}
-            <Descriptions.Item
-              label="Name"
-              style={{ color: "#555d64", fontWeight: "bold" }}
-            >
+            <Descriptions.Item label="Name" style={{ color: "#555d64" }}>
               {record?.productName}
             </Descriptions.Item>
-            <Descriptions.Item
-              label="Price"
-              style={{ color: "#555d64", fontWeight: "bold" }}
-            >
+            <Descriptions.Item label="Price" style={{ color: "#555d64" }}>
               {record?.productPrice}
             </Descriptions.Item>
-            <Descriptions.Item
-              label="Quantity"
-              style={{ color: "#555d64", fontWeight: "bold" }}
-            >
+            <Descriptions.Item label="Quantity" style={{ color: "#555d64" }}>
               {record?.quantity}
             </Descriptions.Item>
-            <Descriptions.Item
-              label="Quality"
-              style={{ color: "#555d64", fontWeight: "bold" }}
-            >
+            <Descriptions.Item label="Quality" style={{ color: "#555d64" }}>
               {record?.quality}
             </Descriptions.Item>
-            <Descriptions.Item
-              label="Potency"
-              style={{ color: "#555d64", fontWeight: "bold" }}
-            >
+            <Descriptions.Item label="Potency" style={{ color: "#555d64" }}>
               {record?.productPotency}
             </Descriptions.Item>
-            <Descriptions.Item
-              label="Genetics"
-              style={{ color: "#555d64", fontWeight: "bold" }}
-            >
+            <Descriptions.Item label="Genetics" style={{ color: "#555d64" }}>
               {record?.productGenetics}
             </Descriptions.Item>
-            <Descriptions.Item
-              label="Origin"
-              style={{ color: "#555d64", fontWeight: "bold" }}
-            >
+            <Descriptions.Item label="Origin" style={{ color: "#555d64" }}>
               {record?.productOrigin}
             </Descriptions.Item>
-            <Descriptions.Item
-              label="Type"
-              style={{ color: "#555d64", fontWeight: "bold" }}
-            >
+            <Descriptions.Item label="Type" style={{ color: "#555d64" }}>
               {record?.productType}
             </Descriptions.Item>
-            <Descriptions.Item
-              label="Scent"
-              style={{ color: "#555d64", fontWeight: "bold" }}
-            >
+            <Descriptions.Item label="Scent" style={{ color: "#555d64" }}>
               {record?.productScent}
             </Descriptions.Item>
-            <Descriptions.Item
-              label="Description"
-              span={2}
-              style={{ color: "#555d64", fontWeight: "bold" }}
-            >
-              {record?.productDescription}
-            </Descriptions.Item>
+
             <Descriptions.Item
               label="Mood Tags"
               span={2}
-              style={{ color: "#555d64", fontWeight: "bold" }}
+              style={{ color: "#555d64" }}
             >
               {record?.moodTag && record.moodTag.join(", ")}
             </Descriptions.Item>
-            <Descriptions.Item
-              label="Created At"
-              span={2}
-              style={{ color: "#555d64", fontWeight: "bold" }}
-            >
-              {record?.createdAt}
+            <Descriptions.Item label="Date" style={{ color: "#555d64" }}>
+              {new Date(record?.createdAt).toLocaleDateString()}
             </Descriptions.Item>
-            {/* <Descriptions.Item
-              label="Updated At"
+
+            <Descriptions.Item label="Time" style={{ color: "#555d64" }}>
+              {new Date(record?.createdAt).toLocaleTimeString()}
+            </Descriptions.Item>
+
+            <Descriptions.Item
+              label="Description"
               span={2}
-              style={{ color: "#555d64", fontWeight: "bold" }}
+              style={{
+                color: "#555d64",
+                whiteSpace: "pre-wrap",
+                wordBreak: "break-word",
+                maxHeight: "50px", // Set the max height
+                overflowY: "auto", // Make it scrollable vertically
+              }}
             >
-              {new Date(record?.updatedAt).toLocaleString()}
-            </Descriptions.Item> */}
+              {record?.productDescription}
+            </Descriptions.Item>
           </Descriptions>
         </div>
       </Modal>

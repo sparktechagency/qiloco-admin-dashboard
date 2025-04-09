@@ -92,8 +92,8 @@ const EarningsTable = ({
     },
     {
       title: "Trnx Id",
-      dataIndex: "trnxid",
-      key: "trnxid",
+      dataIndex: "paymentIntentId",
+      key: "paymentIntentId",
       render: (text) => text || "N/A",
     },
     {
@@ -115,8 +115,8 @@ const EarningsTable = ({
     },
     {
       title: "Status",
-      dataIndex: "status",
-      key: "status",
+      dataIndex: "paymentStatus",
+      key: "paymentStatus",
       render: (text) => text || "N/A",
     },
     {
@@ -164,8 +164,12 @@ const EarningsTable = ({
             pagination={{
               current: page,
               onChange: (page) => setPage(page),
+              showSizeChanger: false, // 🔥 Hide page size dropdown
               pageSize: earnings?.data?.pagination?.limit || 10,
               total: earnings?.data?.pagination?.total || 0,
+              showTotal: (total, range) => (
+                <span className="text-white">{`Total ${total} items`}</span>
+              ),
             }}
           />
         </div>

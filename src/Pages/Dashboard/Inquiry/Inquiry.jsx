@@ -8,7 +8,7 @@ function Inquiry() {
   const [page, setPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedInquiry, setSelectedInquiry] = useState(null);
-  const { data: inquiryData, isLoading } = useInquiryQuery();
+  const { data: inquiryData, isLoading } = useInquiryQuery(page);
 
   // Transform API data for table
   const inquiries = inquiryData?.data?.map((item, index) => ({
@@ -91,8 +91,12 @@ function Inquiry() {
           pagination={{
             current: page,
             onChange: (page) => setPage(page),
-            pageSize: 5,
+            showSizeChanger: false, // 🔥 Hide page size dropdown
+            pageSize: inquiryData?.data?.pagination?.limit,
             total: inquiryData?.data?.length || 0,
+            showTotal: (total, range) => (
+              <span className="text-white">{`Total ${total} items`}</span>
+            ),
           }}
         />
       </div>

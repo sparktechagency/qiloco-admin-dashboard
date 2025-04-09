@@ -126,7 +126,11 @@ const OrderDetailsTable = ({ data }) => {
       key: "box",
       render: () => <MdCheckBoxOutlineBlank size={25} />,
     },
-    { title: "Product Name", dataIndex: "productName", key: "productName" },
+    {
+      title: "Product Name",
+      dataIndex: "productName",
+      key: "productName",
+    },
     { title: "Serial", dataIndex: "serial", key: "serial" },
     { title: "Quantity", dataIndex: "quantity", key: "quantity" },
     { title: "Amount", dataIndex: "amount", key: "amount" },
@@ -150,6 +154,7 @@ const OrderDetailsTable = ({ data }) => {
             headerBg: "#353536",
             colorText: "white",
             rowHoverBg: "#4a4a4a",
+            colorTextHeading: "white", // 👈 add this line
             headerSplitColor: "none",
           },
         },
@@ -163,11 +168,12 @@ const OrderDetailsTable = ({ data }) => {
           showHeader
           // bordered
         />
-        <div className="flex justify-end my-4">
-          <p className="text-amber-400 mr-28">
-            Total{" "}
-            <span className="font-sans ml-20">${data?.totalPrice || 0}</span>
-          </p>
+        <div className="w-full flex justify-end my-4 ">
+          <div className="w-4/12 flex justify-between items-center ">
+            <p className="text-amber-400  flex justify-between  w-[204px] mr-4 ">
+              Total <span className="font-sans">${data?.totalPrice || 0}</span>
+            </p>
+          </div>
         </div>
       </div>
     </ConfigProvider>

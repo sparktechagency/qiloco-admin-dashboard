@@ -239,8 +239,12 @@ function OrderDetails() {
                 size="middle"
                 pagination={{
                   onChange: (page) => setPage(page),
+                  showSizeChanger: false, // 🔥 Hide page size dropdown
                   pageSize: orderList?.data?.pagination?.limit,
                   total: orderList?.data?.pagination?.total,
+                  showTotal: (total, range) => (
+                    <span className="text-white">{`Total ${total} items`}</span>
+                  ),
                 }}
               />
             </div>

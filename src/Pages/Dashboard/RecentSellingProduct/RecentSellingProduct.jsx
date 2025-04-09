@@ -114,8 +114,12 @@ function RecentSellingProduct() {
           size="middle"
           pagination={{
             onChange: (page) => setPage(page),
+            showSizeChanger: false, // 🔥 Hide page size dropdown
             pageSize: data?.data?.pagination?.limit,
             total: data?.data?.pagination?.total,
+            showTotal: (total, range) => (
+              <span className="text-white">{`Total ${total} items`}</span>
+            ),
           }}
         />
       </div>
