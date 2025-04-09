@@ -59,9 +59,10 @@ export default function EarningOverview() {
           <div className="flex items-center justify-between w-full pr-5 mb-4">
             <h2 className="text-lg font-medium text-white">Earning Overview</h2>
             <div className="flex text-white gap-5">
-              <p className="font-light text-white">Yearly Growth</p>
+              <p className="font-light text-white mt-1">Yearly Growth</p>
               <span className="font-bold">
                 ${earningChartData?.data?.yearlyGrowth?.toLocaleString() || "0"}
+                %
               </span>
             </div>
           </div>

@@ -123,7 +123,7 @@ function ProductList() {
 
   if (isLoading) return <Loading />;
   return (
-    <div className="px-3 py-4">
+    <div className="px-3 py-3">
       <div className="text-white flex justify-between mb-4">
         <ConfigProvider
           theme={{

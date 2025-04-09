@@ -57,7 +57,7 @@ export default function MonthlySale() {
               Product Selling Overview
             </h2>
             <div className="flex text-white gap-5">
-              <p className="font-light text-white">Monthly Growth</p>
+              <p className="font-light text-white mt-1">Monthly Growth</p>
               <span className="font-bold">
                 {productChartData?.data?.totalGrowth}%
               </span>

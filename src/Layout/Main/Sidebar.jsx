@@ -144,15 +144,26 @@ const Sidebar = ({ isCollapsed }) => {
           <img src={qilocoLogo} />
         </div>
       </Link>
-
-      <Menu
-        mode="inline"
-        selectedKeys={[selectedKey]}
-        style={{ background: "#232323" }}
-        items={menuItems}
-        className="text-white mt-10"
-        inlineCollapsed={isCollapsed}
-      />
+      <div
+        className=" h-[70%]  overflow-y-auto
+  [&::-webkit-scrollbar]:w-0
+  [&::-webkit-scrollbar-track]:rounded-full
+  [&::-webkit-scrollbar-track]:bg-gray-100
+  [&::-webkit-scrollbar-thumb]:rounded-full
+  [&::-webkit-scrollbar-thumb]:bg-gray-300
+  dark:[&::-webkit-scrollbar-track]:bg-neutral-700
+  dark:[&::-webkit-scrollbar-thumb]:bg-neutral-500
+"
+      >
+        <Menu
+          mode="inline"
+          selectedKeys={[selectedKey]}
+          style={{ background: "#232323" }}
+          items={menuItems}
+          className="text-white mt-10"
+          inlineCollapsed={isCollapsed}
+        />
+      </div>
     </div>
   );
 };
