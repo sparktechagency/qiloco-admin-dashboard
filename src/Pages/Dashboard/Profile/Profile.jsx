@@ -1,11 +1,8 @@
 import React, { useState } from "react";
 import man from "../../../assets/quiloco/man.png";
-import { FaFeather } from "react-icons/fa6";
 import { Button, ConfigProvider, Form, Input, Upload, message } from "antd";
 import { HiMiniPencil } from "react-icons/hi2";
-
 import { imageUrl } from "../../../redux/api/baseApi";
-
 import { useUser } from "../../../provider/User";
 import {
   useProfileQuery,

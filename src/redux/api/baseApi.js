@@ -18,7 +18,7 @@ const baseQuery = fetchBaseQuery({
   },
 });
 
-export const imageUrl = getBaseUrl();
+export const imageUrl = `${getBaseUrl()}`;
 // export const imageUrl = "http://10.0.60.126:6007";
 
 export const api = createApi({
