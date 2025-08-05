@@ -347,7 +347,7 @@ function ProductModal({ isModalOpen, setIsModalOpen, editProduct = null }) {
                   className="border-none h-10 w-full  flex items-center"
                   style={{
                     background: isEditMode ? "#f0f5ff" : "black",
-                    colorText: isEditMode ? "black" : "white",
+                    color: isEditMode ? "black" : "white",
                   }}
                   onFocus={() => setFocusedField("productPrice")}
                   onBlur={() => setFocusedField(null)}
