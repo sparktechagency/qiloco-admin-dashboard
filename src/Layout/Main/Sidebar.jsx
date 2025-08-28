@@ -9,6 +9,7 @@ import { FiLogOut } from "react-icons/fi";
 import { RiMoneyDollarCircleLine, RiSettings5Line } from "react-icons/ri";
 import qilocoLogo from "../../assets/quiloco/qilocoLogo.png";
 import { LuBoxes } from "react-icons/lu";
+import { triggerLogout } from "../../utils/logoutUtils";
 
 const Sidebar = ({ isCollapsed }) => {
   const location = useLocation();
@@ -18,9 +19,9 @@ const Sidebar = ({ isCollapsed }) => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    // localStorage.removeItem("token");
-    // localStorage.removeItem("Super");
-    localStorage.clear();
+    // Trigger cross-tab logout
+    triggerLogout();
+    // Navigate to login page in current tab
     navigate("/auth/login");
   };
 

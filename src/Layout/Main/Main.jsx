@@ -1,14 +1,47 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import Header from "./Header";
 import { Outlet } from "react-router-dom";
+import { setupLogoutListener } from "../../utils/logoutUtils";
+import { isSuperAdmin, isTokenValid } from "../../utils/jwtUtils";
 
 const Main = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const navigate = useNavigate();
 
   const toggleSidebar = () => {
     setIsCollapsed((prev) => !prev);
   };
+
+  // Setup cross-tab logout listener
+  useEffect(() => {
+    const cleanup = setupLogoutListener(navigate);
+    return cleanup;
+  }, [navigate]);
+
+  // Validate token on component mount and periodically
+  useEffect(() => {
+    const validateToken = () => {
+      const token = localStorage.getItem("token");
+
+      // Check if token is valid and user is SUPER_ADMIN
+      if (!token || !isTokenValid(token) || !isSuperAdmin(token)) {
+        // Clear invalid auth data
+        localStorage.removeItem("token");
+        localStorage.removeItem("Super");
+        navigate("/auth/login");
+      }
+    };
+
+    // Validate immediately
+    validateToken();
+
+    // Set up periodic validation (every 5 minutes)
+    const interval = setInterval(validateToken, 5 * 60 * 1000);
+
+    return () => clearInterval(interval);
+  }, [navigate]);
 
   return (
     <div className="h-screen w-screen flex bg-[#f8f8f8]">

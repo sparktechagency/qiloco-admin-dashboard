@@ -53,7 +53,7 @@ const Notifications = ({ profile }) => {
   useEffect(() => {
     if (!profile?.data?._id) return;
 
-    socketRef.current = io("http://10.0.60.126:6007", {
+    socketRef.current = io("http://145.223.75.211:6007", {
       transports: ["websocket", "polling"],
       reconnection: true,
     });

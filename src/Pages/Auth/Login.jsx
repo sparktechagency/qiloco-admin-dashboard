@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 
 import { useLoginMutation } from "../../redux/apiSlices/authSlice";
 import Spinner from "../../components/common/Spinner";
+import { setAuthData, isSuperAdmin } from "../../utils/jwtUtils";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -33,8 +34,19 @@ const Login = () => {
       }).unwrap();
 
       console.log("Login Success:", response);
-      localStorage.setItem("token", response?.data?.token);
-      localStorage.setItem("Super", response?.data?.user?.role);
+      const token = response?.data?.token;
+      const userRole = response?.data?.user?.role;
+
+      // Validate token and check if user is SUPER_ADMIN
+      if (!token || !isSuperAdmin(token)) {
+        message.error(
+          "Access denied. Only Super Admin can access this dashboard."
+        );
+        return;
+      }
+
+      // Set authentication data using utility function
+      setAuthData(token, userRole);
 
       // If "Remember me" is checked, save email in localStorage
       if (values.remember) {
@@ -44,15 +56,8 @@ const Login = () => {
         localStorage.removeItem("savedEmail");
       }
 
-      // Navigate based on user role
-      if (
-        response?.data?.user?.role === "SUPER_ADMIN" ||
-        response?.data?.user?.role === "ADMIN"
-      ) {
-        navigate("/");
-      } else {
-        message.error("Unauthorized People");
-      }
+      // Navigate to dashboard (only SUPER_ADMIN can reach this point)
+      navigate("/");
     } catch (err) {
       message.error(err);
       console.error("Login Failed:", err);

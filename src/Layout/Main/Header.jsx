@@ -52,7 +52,7 @@ const Header = ({ toggleSidebar }) => {
     if (!user?._id) return;
 
     // Connect to Socket.IO server
-    socketRef.current = io("http://10.0.60.126:6007", {
+    socketRef.current = io("http://145.223.75.211:6007", {
       transports: ["websocket", "polling"],
       reconnection: true,
     });
